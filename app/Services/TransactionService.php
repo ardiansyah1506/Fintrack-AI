@@ -13,13 +13,14 @@ class TransactionService
      */
     protected function buildQuery(array $filters): Builder
     {
-        $query = Transaction::with('category');
+        $query = Transaction::query();
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%");
+                  ->orWhere('notes', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%");
             });
         }
 
@@ -27,8 +28,8 @@ class TransactionService
             $query->where('type', strtolower($filters['type']));
         }
 
-        if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+        if (!empty($filters['category'])) {
+            $query->where('category', $filters['category']);
         }
 
         if (!empty($filters['period'])) {
@@ -69,7 +70,7 @@ class TransactionService
         $sortBy = $filters['sort_by'] ?? 'transaction_date';
         $sortDir = strtolower($filters['sort_dir'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
 
-        if (!in_array($sortBy, ['transaction_date', 'amount', 'created_at', 'description'])) {
+        if (!in_array($sortBy, ['transaction_date', 'amount', 'created_at', 'description', 'category'])) {
             $sortBy = 'transaction_date';
         }
 
@@ -111,7 +112,7 @@ class TransactionService
      */
     public function getTransactionById(int $id): Transaction
     {
-        return Transaction::with('category')->findOrFail($id);
+        return Transaction::findOrFail($id);
     }
 
     /**
@@ -122,7 +123,7 @@ class TransactionService
         return Transaction::create([
             'transaction_date' => $data['transaction_date'],
             'type' => strtolower($data['type']),
-            'category_id' => $data['category_id'],
+            'category' => $data['category'],
             'amount' => $data['amount'],
             'description' => $data['description'],
             'notes' => $data['notes'] ?? null,
@@ -139,7 +140,7 @@ class TransactionService
         $transaction->update([
             'transaction_date' => $data['transaction_date'] ?? $transaction->transaction_date,
             'type' => strtolower($data['type'] ?? $transaction->type),
-            'category_id' => $data['category_id'] ?? $transaction->category_id,
+            'category' => $data['category'] ?? $transaction->category,
             'amount' => $data['amount'] ?? $transaction->amount,
             'description' => $data['description'] ?? $transaction->description,
             'notes' => $data['notes'] ?? $transaction->notes,

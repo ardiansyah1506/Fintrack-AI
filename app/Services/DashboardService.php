@@ -51,7 +51,7 @@ class DashboardService
      */
     public function getRecentTransactions(int $limit = 5)
     {
-        return Transaction::with('category')
+        return Transaction::query()
             ->orderBy('transaction_date', 'desc')
             ->orderBy('id', 'desc')
             ->limit($limit)

@@ -12,7 +12,7 @@ class Transaction extends Model
     protected $fillable = [
         'transaction_date',
         'type',
-        'category_id',
+        'category',
         'amount',
         'description',
         'notes',
@@ -24,10 +24,10 @@ class Transaction extends Model
     ];
 
     /**
-     * Get the category that owns the transaction.
+     * Get the category model associated with the transaction name.
      */
-    public function category()
+    public function categoryModel()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category', 'name');
     }
 }

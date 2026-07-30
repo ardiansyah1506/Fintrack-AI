@@ -38,18 +38,27 @@ class BotService
 
     protected function handleCreateTransaction(array $params): array
     {
-        // If category name is passed instead of category_id, resolve category_id
-        if (empty($params['category_id']) && !empty($params['category_name'])) {
-            $catType = $params['type'] ?? 'expense';
-            $category = $this->categoryService->getAllCategories($catType)
-                ->firstWhere('name', 'iLIKE', "%{$params['category_name']}%")
-                ?? $this->categoryService->getAllCategories()->first();
+        if (empty($params['category']) && !empty($params['category_name'])) {
+            $params['category'] = $params['category_name'];
+        }
 
-            $params['category_id'] = $category?->id;
+        if (empty($params['category'])) {
+            $params['category'] = 'Lainnya';
         }
 
         if (empty($params['transaction_date'])) {
-            $params['transaction_date'] = Carbon::now()->format('Y-m-d');
+            $dateVal = strtolower(trim($params['date'] ?? ''));
+            if ($dateVal === 'today' || $dateVal === 'hari ini' || empty($dateVal)) {
+                $params['transaction_date'] = Carbon::now()->format('Y-m-d');
+            } elseif ($dateVal === 'yesterday' || $dateVal === 'kemarin') {
+                $params['transaction_date'] = Carbon::now()->subDay()->format('Y-m-d');
+            } else {
+                try {
+                    $params['transaction_date'] = Carbon::parse($dateVal)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    $params['transaction_date'] = Carbon::now()->format('Y-m-d');
+                }
+            }
         }
 
         $transaction = $this->transactionService->createTransaction($params);
@@ -58,7 +67,7 @@ class BotService
             'intent' => 'create_transaction',
             'status' => 'success',
             'message' => 'Transaksi berhasil dicatat oleh Bot',
-            'transaction' => $transaction->load('category'),
+            'transaction' => $transaction,
         ];
     }
 
@@ -68,13 +77,17 @@ class BotService
             throw new InvalidArgumentException("Parameter 'id' wajib diisi untuk intent update_transaction");
         }
 
+        if (empty($params['category']) && !empty($params['category_name'])) {
+            $params['category'] = $params['category_name'];
+        }
+
         $transaction = $this->transactionService->updateTransaction($params['id'], $params);
 
         return [
             'intent' => 'update_transaction',
             'status' => 'success',
             'message' => 'Transaksi berhasil diperbarui',
-            'transaction' => $transaction->load('category'),
+            'transaction' => $transaction,
         ];
     }
 
@@ -148,7 +161,7 @@ class BotService
         return [
             'intent' => 'help',
             'available_intents' => [
-                'create_transaction' => 'Mencatat transaksi baru (params: transaction_date, type, category_id/category_name, amount, description, notes)',
+                'create_transaction' => 'Mencatat transaksi baru (params: transaction_date, type, category/category_name, amount, description, notes)',
                 'update_transaction' => 'Memperbarui transaksi (params: id, ...field_to_update)',
                 'delete_transaction' => 'Menghapus transaksi (params: id)',
                 'statistics' => 'Mengambil statistik ringkas keuangan',

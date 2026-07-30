@@ -23,31 +23,41 @@ class ReportService
             ->whereDate('transaction_date', $targetDate)
             ->sum('amount');
 
-        $transactions = Transaction::with('category')
-            ->whereDate('transaction_date', $targetDate)
+        $transactions = Transaction::whereDate('transaction_date', $targetDate)
             ->orderBy('amount', 'desc')
             ->get();
 
         $topExpense = $transactions->where('type', 'expense')->first();
 
-        $categoryBreakdown = Transaction::where('transaction_date', $targetDate)
-            ->where('transactions.type', 'expense')
-            ->join('categories', 'transactions.category_id', '=', 'categories.id')
-            ->select('categories.name', 'categories.color', DB::raw('SUM(transactions.amount) as total'))
-            ->groupBy('categories.id', 'categories.name', 'categories.color')
+        $categoryBreakdownRaw = Transaction::whereDate('transaction_date', $targetDate)
+            ->where('type', 'expense')
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
             ->orderByDesc('total')
             ->get();
+
+        $defaultColors = ['#F43F5E', '#8B5CF6', '#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#6366F1'];
+        $categoriesBreakdown = [];
+        foreach ($categoryBreakdownRaw as $idx => $cat) {
+            $categoriesBreakdown[] = [
+                'name' => $cat->category,
+                'color' => $defaultColors[$idx % count($defaultColors)],
+                'total' => (float) $cat->total,
+                'percentage' => $expenseTotal > 0 ? round(($cat->total / $expenseTotal) * 100, 1) : 0,
+            ];
+        }
 
         return [
             'period_type' => 'daily',
             'date' => $targetDate,
-            'income_total' => $incomeTotal,
-            'expense_total' => $expenseTotal,
-            'balance' => $incomeTotal - $expenseTotal,
-            'total_transactions' => $transactions->count(),
-            'top_expense' => $topExpense,
-            'top_category' => $categoryBreakdown->first()?->name ?? '-',
-            'category_breakdown' => $categoryBreakdown,
+            'summary' => [
+                'total_income' => $incomeTotal,
+                'total_expense' => $expenseTotal,
+                'net_balance' => $incomeTotal - $expenseTotal,
+                'total_transactions' => $transactions->count(),
+                'top_expense' => $topExpense,
+            ],
+            'categories_breakdown' => $categoriesBreakdown,
             'transactions' => $transactions,
         ];
     }
@@ -68,32 +78,42 @@ class ReportService
             ->whereBetween('transaction_date', [$start, $end])
             ->sum('amount');
 
-        $transactions = Transaction::with('category')
-            ->whereBetween('transaction_date', [$start, $end])
+        $transactions = Transaction::whereBetween('transaction_date', [$start, $end])
             ->orderBy('transaction_date', 'desc')
             ->get();
 
         $topExpense = $transactions->where('type', 'expense')->sortByDesc('amount')->first();
 
-        $categoryBreakdown = Transaction::whereBetween('transaction_date', [$start, $end])
-            ->where('transactions.type', 'expense')
-            ->join('categories', 'transactions.category_id', '=', 'categories.id')
-            ->select('categories.name', 'categories.color', DB::raw('SUM(transactions.amount) as total'))
-            ->groupBy('categories.id', 'categories.name', 'categories.color')
+        $categoryBreakdownRaw = Transaction::whereBetween('transaction_date', [$start, $end])
+            ->where('type', 'expense')
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
             ->orderByDesc('total')
             ->get();
+
+        $defaultColors = ['#F43F5E', '#8B5CF6', '#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#6366F1'];
+        $categoriesBreakdown = [];
+        foreach ($categoryBreakdownRaw as $idx => $cat) {
+            $categoriesBreakdown[] = [
+                'name' => $cat->category,
+                'color' => $defaultColors[$idx % count($defaultColors)],
+                'total' => (float) $cat->total,
+                'percentage' => $expenseTotal > 0 ? round(($cat->total / $expenseTotal) * 100, 1) : 0,
+            ];
+        }
 
         return [
             'period_type' => 'weekly',
             'start_date' => $start,
             'end_date' => $end,
-            'income_total' => $incomeTotal,
-            'expense_total' => $expenseTotal,
-            'balance' => $incomeTotal - $expenseTotal,
-            'total_transactions' => $transactions->count(),
-            'top_expense' => $topExpense,
-            'top_category' => $categoryBreakdown->first()?->name ?? '-',
-            'category_breakdown' => $categoryBreakdown,
+            'summary' => [
+                'total_income' => $incomeTotal,
+                'total_expense' => $expenseTotal,
+                'net_balance' => $incomeTotal - $expenseTotal,
+                'total_transactions' => $transactions->count(),
+                'top_expense' => $topExpense,
+            ],
+            'categories_breakdown' => $categoriesBreakdown,
             'transactions' => $transactions,
         ];
     }
@@ -103,9 +123,6 @@ class ReportService
      */
     public function getMonthlyReport(int $year, int $month): array
     {
-        $start = Carbon::create($year, $month, 1)->startOfMonth()->format('Y-m-d');
-        $end = Carbon::create($year, $month, 1)->endOfMonth()->format('Y-m-d');
-
         $incomeTotal = (float) Transaction::where('type', 'income')
             ->whereYear('transaction_date', $year)
             ->whereMonth('transaction_date', $month)
@@ -116,35 +133,45 @@ class ReportService
             ->whereMonth('transaction_date', $month)
             ->sum('amount');
 
-        $transactions = Transaction::with('category')
-            ->whereYear('transaction_date', $year)
+        $transactions = Transaction::whereYear('transaction_date', $year)
             ->whereMonth('transaction_date', $month)
             ->orderBy('transaction_date', 'desc')
             ->get();
 
         $topExpense = $transactions->where('type', 'expense')->sortByDesc('amount')->first();
 
-        $categoryBreakdown = Transaction::whereYear('transaction_date', $year)
+        $categoryBreakdownRaw = Transaction::whereYear('transaction_date', $year)
             ->whereMonth('transaction_date', $month)
-            ->where('transactions.type', 'expense')
-            ->join('categories', 'transactions.category_id', '=', 'categories.id')
-            ->select('categories.name', 'categories.color', DB::raw('SUM(transactions.amount) as total'))
-            ->groupBy('categories.id', 'categories.name', 'categories.color')
+            ->where('type', 'expense')
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
             ->orderByDesc('total')
             ->get();
+
+        $defaultColors = ['#F43F5E', '#8B5CF6', '#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#6366F1'];
+        $categoriesBreakdown = [];
+        foreach ($categoryBreakdownRaw as $idx => $cat) {
+            $categoriesBreakdown[] = [
+                'name' => $cat->category,
+                'color' => $defaultColors[$idx % count($defaultColors)],
+                'total' => (float) $cat->total,
+                'percentage' => $expenseTotal > 0 ? round(($cat->total / $expenseTotal) * 100, 1) : 0,
+            ];
+        }
 
         return [
             'period_type' => 'monthly',
             'year' => $year,
             'month' => $month,
             'month_name' => Carbon::create($year, $month, 1)->translatedFormat('F Y'),
-            'income_total' => $incomeTotal,
-            'expense_total' => $expenseTotal,
-            'balance' => $incomeTotal - $expenseTotal,
-            'total_transactions' => $transactions->count(),
-            'top_expense' => $topExpense,
-            'top_category' => $categoryBreakdown->first()?->name ?? '-',
-            'category_breakdown' => $categoryBreakdown,
+            'summary' => [
+                'total_income' => $incomeTotal,
+                'total_expense' => $expenseTotal,
+                'net_balance' => $incomeTotal - $expenseTotal,
+                'total_transactions' => $transactions->count(),
+                'top_expense' => $topExpense,
+            ],
+            'categories_breakdown' => $categoriesBreakdown,
             'transactions' => $transactions,
         ];
     }

@@ -22,7 +22,7 @@ class UpdateTransactionRequest extends FormRequest
         return [
             'transaction_date' => 'sometimes|required|date',
             'type' => 'sometimes|required|in:income,expense,Income,Expense',
-            'category_id' => 'sometimes|required|exists:categories,id',
+            'category' => 'sometimes|required|string|max:100',
             'amount' => 'sometimes|required|numeric|min:0.01',
             'description' => 'sometimes|required|string|max:255',
             'notes' => 'nullable|string',

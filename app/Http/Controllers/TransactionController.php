@@ -23,7 +23,7 @@ class TransactionController extends Controller
         $filters = $request->only([
             'search',
             'type',
-            'category_id',
+            'category',
             'period',
             'date_start',
             'date_end',

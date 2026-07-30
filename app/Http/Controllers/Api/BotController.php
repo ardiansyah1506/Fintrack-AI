@@ -22,11 +22,27 @@ class BotController extends Controller
      */
     public function execute(Request $request)
     {
-        $validated = $request->validate([
+        $input = $request->all();
+
+        // If n8n sends payload wrapped in an array [ { "intent": "..." } ]
+        if (isset($input[0]) && is_array($input[0])) {
+            $input = $input[0];
+        }
+
+        $validator = validator($input, [
             'intent' => 'required|string',
             'parameters' => 'nullable|array',
         ]);
 
+        if ($validator->fails()) {
+            return $this->errorResponse(
+                'Format payload tidak valid',
+                $validator->errors(),
+                422
+            );
+        }
+
+        $validated = $validator->validated();
         $intent = $validated['intent'];
         $parameters = $validated['parameters'] ?? [];
 

@@ -145,7 +145,7 @@
                                     </x-badge>
                                 </td>
                                 <td class="px-6 py-3.5 whitespace-nowrap text-xs text-slate-600">
-                                    {{ $tx->category->name ?? '-' }}
+                                    {{ $tx->category }}
                                 </td>
                                 <td class="px-6 py-3.5 text-xs text-slate-800 font-medium">
                                     {{ $tx->description }}

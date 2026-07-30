@@ -48,6 +48,7 @@ class CategoryService
     public function updateCategory(int $id, array $data): Category
     {
         $category = $this->getCategoryById($id);
+        $oldName = $category->name;
 
         $category->update([
             'name' => $data['name'] ?? $category->name,
@@ -55,6 +56,10 @@ class CategoryService
             'color' => $data['color'] ?? $category->color,
             'icon' => $data['icon'] ?? $category->icon,
         ]);
+
+        if (isset($data['name']) && $data['name'] !== $oldName) {
+            \App\Models\Transaction::where('category', $oldName)->update(['category' => $data['name']]);
+        }
 
         return $category;
     }

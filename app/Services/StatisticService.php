@@ -64,23 +64,26 @@ class StatisticService
     {
         $now = Carbon::now();
 
-        $expenses = Transaction::where('transactions.type', 'expense')
+        $expenses = Transaction::where('type', 'expense')
             ->whereYear('transaction_date', $now->year)
             ->whereMonth('transaction_date', $now->month)
-            ->join('categories', 'transactions.category_id', '=', 'categories.id')
-            ->select('categories.name', 'categories.color', DB::raw('SUM(transactions.amount) as total'))
-            ->groupBy('categories.id', 'categories.name', 'categories.color')
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
             ->orderByDesc('total')
             ->get();
 
         $labels = [];
         $data = [];
+        $defaultColors = [
+            '#F43F5E', '#8B5CF6', '#10B981', '#3B82F6', '#F59E0B',
+            '#EC4899', '#6366F1', '#14B8A6', '#84CC16', '#EAB308'
+        ];
         $colors = [];
 
-        foreach ($expenses as $item) {
-            $labels[] = $item->name;
+        foreach ($expenses as $index => $item) {
+            $labels[] = $item->category;
             $data[] = (float) $item->total;
-            $colors[] = $item->color ?? '#6B7280';
+            $colors[] = $defaultColors[$index % count($defaultColors)];
         }
 
         if (empty($labels)) {

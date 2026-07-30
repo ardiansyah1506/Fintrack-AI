@@ -22,7 +22,7 @@ class StoreTransactionRequest extends FormRequest
         return [
             'transaction_date' => 'required|date',
             'type' => 'required|in:income,expense,Income,Expense',
-            'category_id' => 'required|exists:categories,id',
+            'category' => 'required|string|max:100',
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
             'notes' => 'nullable|string',

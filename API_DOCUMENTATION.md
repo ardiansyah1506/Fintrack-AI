@@ -147,7 +147,7 @@ Laravel Monolith bertindak sebagai **Single Source of Truth**. Seluruh data disi
   {
     "transaction_date": "2026-07-30",
     "type": "expense",
-    "category_id": 1,
+    "category": "Makanan & Minuman",
     "amount": 45000,
     "description": "Makan Siang Resto Padang",
     "notes": "Dibayar via QRIS"

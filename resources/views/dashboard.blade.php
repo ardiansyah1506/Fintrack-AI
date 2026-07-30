@@ -122,12 +122,12 @@
                     @forelse($recent_transactions as $tx)
                         <div class="p-4 flex items-center justify-between gap-3 hover:bg-slate-50/50 transition">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs" style="background-color: {{ $tx->category->color ?? '#6B7280' }};">
-                                    <i class="fa-solid fa-{{ $tx->category->icon ?? 'folder' }} text-sm"></i>
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs bg-indigo-500">
+                                    <i class="fa-solid fa-folder text-sm"></i>
                                 </div>
                                 <div class="min-w-0">
                                     <h4 class="text-xs font-semibold text-slate-800 truncate">{{ $tx->description }}</h4>
-                                    <p class="text-[11px] text-slate-400">{{ formatDate($tx->transaction_date) }} • {{ $tx->category->name ?? 'Kategori' }}</p>
+                                    <p class="text-[11px] text-slate-400">{{ formatDate($tx->transaction_date) }} • {{ $tx->category }}</p>
                                 </div>
                             </div>
                             <div class="text-right shrink-0">

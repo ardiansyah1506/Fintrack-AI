@@ -14,7 +14,7 @@
         editId: null,
         editDate: '',
         editType: 'expense',
-        editCategoryId: '',
+        editCategory: '',
         editAmount: '',
         editDescription: '',
         editNotes: '',
@@ -33,7 +33,7 @@
             this.editId = tx.id;
             this.editDate = tx.transaction_date.substring(0, 10);
             this.editType = tx.type;
-            this.editCategoryId = tx.category_id;
+            this.editCategory = tx.category;
             this.editAmount = tx.amount;
             this.editDescription = tx.description;
             this.editNotes = tx.notes || '';
@@ -132,7 +132,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     <!-- Search -->
                     <div class="lg:col-span-2">
-                        <x-input name="search" placeholder="Cari deskripsi / catatan..." value="{{ request('search') }}" icon="magnifying-glass" />
+                        <x-input name="search" placeholder="Cari deskripsi / catatan / kategori..." value="{{ request('search') }}" icon="magnifying-glass" />
                     </div>
 
                     <!-- Type Filter -->
@@ -145,9 +145,9 @@
 
                     <!-- Category Filter -->
                     <div>
-                        <x-select name="category_id" placeholder="Semua Kategori" icon="layer-group">
+                        <x-select name="category" placeholder="Semua Kategori" icon="layer-group">
                             @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
+                                <option value="{{ $cat->name }}" {{ request('category') == $cat->name ? 'selected' : '' }}>
                                     {{ $cat->name }} ({{ ucfirst($cat->type) }})
                                 </option>
                             @endforeach
@@ -209,14 +209,10 @@
                                 </x-badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($tx->category)
-                                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200/60 text-xs font-semibold text-slate-700">
-                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: {{ $tx->category->color }};"></span>
-                                        <span>{{ $tx->category->name }}</span>
-                                    </div>
-                                @else
-                                    <span class="text-xs text-slate-400">-</span>
-                                @endif
+                                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200/60 text-xs font-semibold text-slate-700">
+                                    <i class="fa-solid fa-folder text-indigo-500 text-xs"></i>
+                                    <span>{{ $tx->category }}</span>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-medium text-slate-800">{{ $tx->description }}</div>
@@ -275,10 +271,10 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Kategori *</label>
-                    <select name="category_id" required class="w-full text-sm rounded-xl border border-slate-300 bg-white text-slate-900 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
+                    <select name="category" required class="w-full text-sm rounded-xl border border-slate-300 bg-white text-slate-900 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
                         <option value="">Pilih Kategori</option>
                         <template x-for="cat in filteredCategories" :key="cat.id">
-                            <option :value="cat.id" x-text="cat.name"></option>
+                            <option :value="cat.name" x-text="cat.name"></option>
                         </template>
                     </select>
                 </div>
@@ -330,10 +326,10 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Kategori *</label>
-                    <select name="category_id" x-model="editCategoryId" required class="w-full text-sm rounded-xl border border-slate-300 bg-white text-slate-900 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
+                    <select name="category" x-model="editCategory" required class="w-full text-sm rounded-xl border border-slate-300 bg-white text-slate-900 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
                         <option value="">Pilih Kategori</option>
                         <template x-for="cat in editFilteredCategories" :key="cat.id">
-                            <option :value="cat.id" x-text="cat.name" :selected="cat.id == editCategoryId"></option>
+                            <option :value="cat.name" x-text="cat.name" :selected="cat.name == editCategory"></option>
                         </template>
                     </select>
                 </div>
