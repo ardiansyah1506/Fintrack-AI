@@ -73,15 +73,20 @@ class BotService
 
     protected function handleUpdateTransaction(array $params): array
     {
-        if (empty($params['id'])) {
-            throw new InvalidArgumentException("Parameter 'id' wajib diisi untuk intent update_transaction");
+        $id = $params['id'] ?? null;
+        if (empty($id)) {
+            $latest = $this->transactionService->getLatestTransaction();
+            if (!$latest) {
+                throw new InvalidArgumentException("Belum ada transaksi yang dapat diperbarui.");
+            }
+            $id = $latest->id;
         }
 
         if (empty($params['category']) && !empty($params['category_name'])) {
             $params['category'] = $params['category_name'];
         }
 
-        $transaction = $this->transactionService->updateTransaction($params['id'], $params);
+        $transaction = $this->transactionService->updateTransaction($id, $params);
 
         return [
             'intent' => 'update_transaction',
@@ -93,16 +98,21 @@ class BotService
 
     protected function handleDeleteTransaction(array $params): array
     {
-        if (empty($params['id'])) {
-            throw new InvalidArgumentException("Parameter 'id' wajib diisi untuk intent delete_transaction");
+        $id = $params['id'] ?? null;
+        if (empty($id)) {
+            $latest = $this->transactionService->getLatestTransaction();
+            if (!$latest) {
+                throw new InvalidArgumentException("Belum ada transaksi yang dapat dihapus.");
+            }
+            $id = $latest->id;
         }
 
-        $this->transactionService->deleteTransaction($params['id']);
+        $this->transactionService->deleteTransaction($id);
 
         return [
             'intent' => 'delete_transaction',
             'status' => 'success',
-            'message' => "Transaksi ID {$params['id']} berhasil dihapus",
+            'message' => "Transaksi ID {$id} berhasil dihapus",
         ];
     }
 

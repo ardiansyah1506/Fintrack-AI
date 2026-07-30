@@ -157,4 +157,12 @@ class TransactionService
         $transaction = $this->getTransactionById($id);
         return (bool) $transaction->delete();
     }
+
+    /**
+     * Get the latest transaction.
+     */
+    public function getLatestTransaction(): ?Transaction
+    {
+        return Transaction::orderBy('id', 'desc')->first();
+    }
 }
