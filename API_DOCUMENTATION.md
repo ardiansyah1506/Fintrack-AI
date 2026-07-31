@@ -1,338 +1,431 @@
-# FinTrack AI - REST API & Telegram Bot Integration Documentation
+# 📘 FinTrack AI - Dedicated REST API Documentation
 
-Selamat datang di Dokumentasi Resmi REST API dan Integrasi Telegram Bot (n8n Engine) untuk **FinTrack AI**.
+Selamat datang di Dokumentasi Resmi REST API **FinTrack AI Personal Finance Operating System**.
 
-Dokumen ini menjelaskan spesifikasi lengkap endpoint REST API, format respon standar, serta skema payload Webhook yang digunakan untuk menghubungkan **n8n Automation Engine**, **Gemini AI**, dan **Telegram Bot** dengan Laravel sebagai *Single Source of Truth*.
-
----
-
-## 📋 Daftar Isi
-1. [Arsitektur Sistem & Alur Bisnis](#1-arsitektur-sistem--alur-bisnis)
-2. [Base URL & Standard Response](#2-base-url--standard-response)
-3. [Spesifikasi REST API Endpoint](#3-spesifikasi-rest-api-endpoint)
-   - [Dashboard & Statistik](#dashboard--statistik)
-   - [Manajemen Kategori](#manajemen-kategori)
-   - [Manajemen Transaksi](#manajemen-transaksi)
-   - [Laporan Keuangan](#laporan-keuangan)
-4. [n8n Webhook & Telegram Bot Engine (`/api/bot/execute`)](#4-n8n-webhook--telegram-bot-engine-apibotexecute)
-   - [Skema Request Webhook](#skema-request-webhook)
-   - [Spesifikasi Intent & Contoh Payload](#spesifikasi-intent--contoh-payload)
-5. [Panduan Integrasi n8n Workflow](#5-panduan-integrasi-n8n-workflow)
+Aplikasi ini berarsitektur **Clean Architecture** berbasis Laravel 12 yang berfungsi sebagai **Control Center**, **Data Center**, dan **Single Source of Truth** untuk seluruh transaksi keuangan, pengingat, tagihan rutin, serta modul kecerdasan buatan (AI Center).
 
 ---
 
-## 1. Arsitektur Sistem & Alur Bisnis
+## 📑 Daftar Isi
+1. [Arsitektur & Konsep Dasar](#1-arsitektur--konsep-dasar)
+2. [Format Respons Standar](#2-format-respons-standar)
+3. [Autentikasi & Header](#3-autentikasi--header)
+4. [Parameter Global (Pagination & Search)](#4-parameter-global-pagination--search)
+5. [Bot Execution Endpoint (n8n / Telegram NLP)](#5-bot-execution-endpoint-n8n--telegram-nlp)
+6. [Dashboard & Metrics API](#6-dashboard--metrics-api)
+7. [Modul Keuangan Core (CRUD)](#7-modul-keuangan-core-crud)
+   - [Categories](#a-categories)
+   - [Transactions](#b-transactions)
+   - [Financial Reports](#c-financial-reports)
+8. [Modul Control Center (CRUD)](#8-modul-control-center-crud)
+   - [Reminders](#a-reminders)
+   - [Recurring Bills](#b-recurring-bills)
+   - [Budgets](#c-budgets)
+   - [Saving Goals](#d-saving-goals)
+   - [Notifications](#e-notifications)
+9. [Modul AI Center (CRUD)](#9-modul-ai-center-crud)
+   - [AI Insights](#a-ai-insights)
+   - [AI Predictions](#b-ai-predictions)
+   - [AI Recommendations](#c-ai-recommendations)
+   - [AI Warnings](#d-ai-warnings)
+   - [AI Achievements](#e-ai-achievements)
+   - [AI Memories (Vector Context)](#f-ai-memories-vector-context)
+   - [Chat History](#g-chat-history)
+   - [Prompt Manager](#h-prompt-manager)
+   - [AI Logs](#i-ai-logs)
+10. [Panduan Integrasi n8n & Gemini](#10-panduan-integrasi-n8n--gemini)
 
-Laravel Monolith bertindak sebagai **Single Source of Truth**. Seluruh data disimpan dan dikelola hanya melalui MySQL via Laravel Service Layer.
+---
+
+## 1. Arsitektur & Konsep Dasar
 
 ```
-┌─────────────────┐       ┌────────────────────┐       ┌────────────────────┐
-│  User Telegram  │ ────► │  Telegram Bot API  │ ────► │    n8n Workflow    │
-└─────────────────┘       └────────────────────┘       └─────────┬──────────┘
-                                                                 │ (Parse NLP / AI)
-                                                                 ▼
-┌─────────────────┐       ┌────────────────────┐       ┌────────────────────┐
-│ MySQL Database  │ ◄──── │   Service Layer    │ ◄──── │ Laravel REST API   │
-│  (fintrack_ai)  │       │ (TransactionService│       │ (/api/bot/execute) │
-└─────────────────┘       └────────────────────┘       └────────────────────┘
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Telegram    │ ──> │     n8n      │ ──> │   Gemini     │ ──> │   Laravel    │
+│  (Chat UI)   │ <── │  (Workflow)  │ <── │  (AI Brain)  │ <── │(Control Ctr) │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
 ```
+
+- **Laravel**: Mengelola database MySQL, memproses *business logic*, *Repository Pattern*, REST API Server, dan Dashboard UI.
+- **n8n**: Mesin otomasi *workflow* dan satu-satunya *Scheduler/Cronrunner*.
+- **Gemini**: AI Engine untuk *Natural Language Processing* (NLP) & ekstraksi intent.
+- **Telegram**: Antarmuka interaksi berbasis percakapan (*Chat Interface*).
 
 ---
 
-## 2. Base URL & Standard Response
+## 2. Format Respons Standar
 
-- **Base URL Local**: `http://127.0.0.1:8000/api`
-- **Header**:
-  - `Accept: application/json`
-  - `Content-Type: application/json`
+Seluruh endpoint REST API FinTrack AI mengembalikan format JSON baku:
 
-### Standard Response Format (Success - 200 OK / 201 Created)
+### A. Respon Berhasil (HTTP 200 / 201)
 ```json
 {
-  "success": true,
-  "message": "Pesan deskripsi status sukses",
-  "data": { ... }
+    "success": true,
+    "message": "Pesan deskriptif keberhasilan",
+    "data": {
+        // Object atau Array hasil query
+    }
 }
 ```
 
-### Standard Response Format (Error - 400 Bad Request / 422 Unprocessable / 500)
+### B. Respon Gagal Validasi (HTTP 422)
 ```json
 {
-  "success": false,
-  "message": "Pesan deskripsi kesalahan",
-  "errors": {
-    "field_name": [
-      "Pesan error spesifik validasi"
-    ]
-  }
+    "success": false,
+    "message": "Validation Error",
+    "errors": {
+        "amount": [
+            "The amount field is required."
+        ],
+        "category": [
+            "The category field is required."
+        ]
+    }
+}
+```
+
+### C. Respon Error Sistem / Not Found (HTTP 400 / 404 / 500)
+```json
+{
+    "success": false,
+    "message": "Penyebab kesalahan atau data tidak ditemukan"
 }
 ```
 
 ---
 
-## 3. Spesifikasi REST API Endpoint
+## 3. Autentikasi & Header
 
-### Dashboard & Statistik
+Setiap *HTTP Request* yang dikirimkan oleh client (Web, Mobile, n8n) wajib menyertakan header:
 
-#### 1. Get Dashboard Summary
-- **Endpoint**: `GET /api/dashboard`
-- **Deskripsi**: Mengambil 5 metrik summary saldo, income/expense bulan ini, net balance, & 5 transaksi terbaru.
-- **Sample Response**:
-  ```json
-  {
+```http
+Accept: application/json
+Content-Type: application/json
+```
+
+*(Catatan: Autentikasi API Key / Bearer Token menyesuaikan konfigurasi environment proyek `API_KEY` atau `BEARER_TOKEN`).*
+
+---
+
+## 4. Parameter Global (Pagination & Search)
+
+Seluruh endpoint berjenis **List/Collection** (`GET`) mendukung parameter URL query berikut:
+
+| Parameter | Tipe | Contoh | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `search` | String | `?search=gofood` | Pencarian dinamis pada nama/keterangan/kategori |
+| `page` | Integer | `?page=2` | Halaman paginasi yang ingin dibuka (default: `1`) |
+| `per_page` | Integer | `?per_page=15` | Jumlah data per halaman (default: `10`) |
+| `sort_by` | String | `?sort_by=amount` | Kolom pengurutan data |
+| `sort_dir` | String | `?sort_dir=desc` | Arah pengurutan (`asc` atau `desc`) |
+
+---
+
+## 5. Bot Execution Endpoint (n8n / Telegram NLP)
+
+Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent & Parameter dari pesan Telegram.
+
+### `POST /api/bot/execute`
+
+#### Payload Request Example:
+```json
+{
+    "intent": "create_transaction",
+    "parameters": {
+        "type": "expense",
+        "amount": 75000,
+        "category": "Makanan",
+        "description": "Makan siang bersama tim",
+        "date": "2026-07-31"
+    }
+}
+```
+
+#### Daftar Intent Lengkap yang Diterima Engine (`IntentDispatcherService`):
+
+| Category | Intent String | Deskripsi Parameter (`parameters`) |
+| :--- | :--- | :--- |
+| **Transaction** | `create_transaction` | `type` (income/expense), `amount`, `category`, `description`, `date` |
+| | `update_transaction` | `id`, `amount`, `category`, `description`, `date` |
+| | `delete_transaction` | `id` |
+| **Category** | `create_category` | `name`, `type` (income/expense) |
+| | `update_category` | `id`, `name`, `type` |
+| | `delete_category` | `id` |
+| **Statistics** | `statistics` | `period` (today/this_week/this_month) |
+| | `report` / `daily_report` | `date` (YYYY-MM-DD) |
+| | `weekly_report` | `start_date`, `end_date` |
+| | `monthly_report` | `year`, `month` |
+| **Reminder** | `create_reminder` | `title`, `due_date`, `notes` |
+| | `update_reminder` | `id`, `status` (pending/completed) |
+| | `delete_reminder` | `id` |
+| | `list_reminders` | `status` (pending/completed) |
+| **Bills** | `create_bill` | `name`, `amount`, `due_date`, `frequency` |
+| | `update_bill` | `id`, `status` (active/paid) |
+| | `delete_bill` | `id` |
+| | `list_bills` | - |
+| **Budgets** | `create_budget` | `category`, `amount_limit`, `period` |
+| | `update_budget` | `id`, `amount_limit` |
+| | `delete_budget` | `id` |
+| | `budget` / `balance` | - |
+| **Saving Goals** | `create_saving_goal` | `name`, `target_amount`, `target_date` |
+| | `update_saving_goal` | `id`, `current_amount` |
+| | `delete_saving_goal` | `id` |
+| | `saving_progress` | - |
+| **AI Modules** | `ai_insight` | `topic` |
+| | `ai_prediction` | `type` |
+| | `ai_recommendation` | `context` |
+| **System** | `greeting` | - |
+| | `telegram_status` | - |
+| | `dashboard` | - |
+| | `help` | - |
+| | `unknown` | - |
+
+---
+
+## 6. Dashboard & Metrics API
+
+### A. Get Complete Dashboard Data
+- **Route:** `GET /api/dashboard`
+- **Response Contoh:**
+```json
+{
     "success": true,
     "message": "Berhasil mengambil data dashboard",
     "data": {
-      "summary": {
-        "current_balance": 10080000,
-        "monthly_income": 18500000,
-        "monthly_expense": 8420000,
-        "monthly_balance": 10080000,
-        "total_transactions": 16
-      },
-      "recent_transactions": [ ... ]
+        "summary": {
+            "current_balance": 15500000,
+            "total_income": 20000000,
+            "total_expense": 4500000,
+            "monthly_income": 20000000,
+            "monthly_expense": 4500000,
+            "monthly_balance": 15500000,
+            "total_transactions": 48
+        },
+        "recent_transactions": [ ... ],
+        "income_vs_expense_chart": { ... },
+        "expense_by_category_chart": { ... }
     }
-  }
-  ```
-
-#### 2. Get Analytics Statistics
-- **Endpoint**: `GET /api/statistics`
-- **Deskripsi**: Mengambil data struktur Chart (Income vs Expense 6 Bulan, Breakdown Kategori, & Trend Transaksi).
-
----
-
-### Manajemen Kategori
-
-#### 1. List All Categories
-- **Endpoint**: `GET /api/categories?type=expense`
-- **Query Parameters**:
-  - `type` *(optional)*: `income` | `expense`
-
-#### 2. Create Category
-- **Endpoint**: `POST /api/categories`
-- **Payload**:
-  ```json
-  {
-    "name": "Investasi & Saham",
-    "type": "expense",
-    "color": "#8B5CF6",
-    "icon": "chart-bar"
-  }
-  ```
-
-#### 3. Update Category
-- **Endpoint**: `PUT /api/categories/{id}`
-
-#### 4. Delete Category
-- **Endpoint**: `DELETE /api/categories/{id}`
-
----
-
-### Manajemen Transaksi
-
-#### 1. List Transactions (With Search & Pagination)
-- **Endpoint**: `GET /api/transactions`
-- **Query Parameters**:
-  - `search` *(optional)*: String pencarian deskripsi/catatan.
-  - `type` *(optional)*: `income` | `expense`
-  - `category_id` *(optional)*: Integer ID kategori.
-  - `date_start` *(optional)*: `YYYY-MM-DD`
-  - `date_end` *(optional)*: `YYYY-MM-DD`
-  - `page` *(optional)*: Integer nomor halaman (default: 1).
-
-#### 2. Create Transaction
-- **Endpoint**: `POST /api/transactions`
-- **Payload**:
-  ```json
-  {
-    "transaction_date": "2026-07-30",
-    "type": "expense",
-    "category": "Makanan & Minuman",
-    "amount": 45000,
-    "description": "Makan Siang Resto Padang",
-    "notes": "Dibayar via QRIS"
-  }
-  ```
-
-#### 3. Update Transaction
-- **Endpoint**: `PUT /api/transactions/{id}`
-
-#### 4. Delete Transaction
-- **Endpoint**: `DELETE /api/transactions/{id}`
-
----
-
-### Laporan Keuangan
-
-- **Daily Report**: `GET /api/report/daily?date=2026-07-30`
-- **Weekly Report**: `GET /api/report/weekly?start_date=2026-07-24&end_date=2026-07-30`
-- **Monthly Report**: `GET /api/report/monthly?year=2026&month=07`
-
----
-
-## 4. n8n Webhook & Telegram Bot Engine (`/api/bot/execute`)
-
-Endpoint ini merupakan webhook utama yang menerima instruksi *intent* yang diekstrak oleh n8n (menggunakan AI/NLP) untuk dibalas kembali ke Telegram Bot.
-
-- **Endpoint**: `POST /api/bot/execute`
-
-### Skema Request Webhook
-```json
-{
-  "intent": "NAMA_INTENT",
-  "parameters": {
-    ...
-  }
 }
 ```
 
----
+### B. Get Statistics Summary
+- **Route:** `GET /api/statistics`
 
-### Spesifikasi Intent & Contoh Payload
-
-#### A. Intent: `create_transaction`
-Mencatat transaksi baru dari pesan natural user Telegram.
-
-**Request:**
+### C. Get AI Summary Widget Metrics
+- **Route:** `GET /api/dashboard/ai`
+- **Response Contoh:**
 ```json
 {
-  "intent": "create_transaction",
-  "parameters": {
-    "type": "expense",
-    "category_name": "Makanan & Minuman",
-    "amount": 45000,
-    "description": "Makan Siang Resto Padang",
-    "transaction_date": "2026-07-30",
-    "notes": "Catatan tambahan opsional"
-  }
+    "success": true,
+    "message": "Data AI Summary Berhasil",
+    "data": {
+        "balance": 15500000,
+        "reminders_count": 3,
+        "bills_count": 2
+    }
 }
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Intent 'create_transaction' berhasil diproses.",
-  "data": {
-    "intent": "create_transaction",
-    "reply_text": "✅ Transaksi Pengeluaran berhasil dicatat!\n💰 Nominal: Rp 45.000\n🏷️ Kategori: Makanan & Minuman\n📝 Deskripsi: Makan Siang Resto Padang\n📅 Tanggal: 30 Juli 2026",
-    "transaction": {
-      "id": 16,
-      "transaction_date": "2026-07-30",
+### D. Get Telegram Sync Status
+- **Route:** `GET /api/telegram/status`
+
+---
+
+## 7. Modul Keuangan Core (CRUD)
+
+### A. Categories
+- `GET /api/categories` : List seluruh kategori (Mendukung `?search=`).
+- `POST /api/categories` : Buat kategori baru.
+  - Payload: `{ "name": "Gaji", "type": "income" }`
+- `GET /api/categories/{id}` : Detail kategori.
+- `PUT /api/categories/{id}` : Update kategori.
+- `DELETE /api/categories/{id}` : Hapus kategori.
+
+### B. Transactions
+- `GET /api/transactions` : List transaksi (Paginated).
+  - Query Filters: `?type=expense`, `?category=Makanan`, `?period=this_month`, `?date_start=2026-07-01&date_end=2026-07-31`.
+- `POST /api/transactions` : Catat transaksi baru.
+  - Payload:
+  ```json
+  {
       "type": "expense",
-      "amount": 45000,
-      "description": "Makan Siang Resto Padang"
-    }
-  }
-}
-```
-
----
-
-#### B. Intent: `statistics`
-Mengambil ringkasan statistik keuangan bulanan.
-
-**Request:**
-```json
-{
-  "intent": "statistics"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Intent 'statistics' berhasil diproses.",
-  "data": {
-    "intent": "statistics",
-    "reply_text": "📊 **Statistik Keuangan Bulan Ini:**\n\n📥 Pemasukan: Rp 18.500.000\n📤 Pengeluaran: Rp 8.420.000\n⚖️ Cashflow Net: Rp 10.080.000"
-  }
-}
-```
-
----
-
-#### C. Intent: `daily_report` / `weekly_report` / `monthly_report`
-
-**Request (Monthly):**
-```json
-{
-  "intent": "monthly_report",
-  "parameters": {
-    "year": 2026,
-    "month": 7
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Intent 'monthly_report' berhasil diproses.",
-  "data": {
-    "intent": "monthly_report",
-    "reply_text": "📅 **Laporan Bulanan (Juli 2026):**\n\n📥 Total Pemasukan: Rp 18.500.000\n📤 Total Pengeluaran: Rp 8.420.000\n💰 Net Cashflow: Rp 10.080.000\n📊 Total Transaksi: 16 data"
-  }
-}
-```
-
----
-
-#### D. Intent: `update_transaction` & `delete_transaction`
-
-- **Update:**
-  ```json
-  {
-    "intent": "update_transaction",
-    "parameters": {
-      "id": 16,
-      "amount": 50000,
-      "description": "Makan Siang Rendang Daging"
-    }
+      "category": "Transportasi",
+      "amount": 25000,
+      "description": "Bensin motor",
+      "transaction_date": "2026-07-31",
+      "source": "Telegram",
+      "notes": "Diinput via bot"
   }
   ```
+- `GET /api/transactions/{id}` : Detail transaksi.
+- `PUT /api/transactions/{id}` : Update transaksi.
+- `DELETE /api/transactions/{id}` : Hapus transaksi.
 
-- **Delete:**
-  ```json
-  {
-    "intent": "delete_transaction",
-    "parameters": {
-      "id": 16
-    }
-  }
-  ```
+### C. Financial Reports
+- `GET /api/report/daily?date=YYYY-MM-DD` : Laporan keuangan harian.
+- `GET /api/report/weekly?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD` : Laporan keuangan mingguan.
+- `GET /api/report/monthly?year=2026&month=7` : Laporan keuangan bulanan.
 
 ---
 
-#### E. Intent: `help`
+## 8. Modul Control Center (CRUD)
+
+### A. Reminders (Pengingat)
+- `GET /api/reminders` : List pengingat.
+- `POST /api/reminders` : Buat pengingat baru.
+  - Payload: `{ "title": "Bayar Listrik", "due_date": "2026-08-05 10:00:00", "notes": "Token PLN" }`
+- `GET /api/reminders/{id}` : Detail pengingat.
+- `PUT /api/reminders/{id}` : Update pengingat.
+- `DELETE /api/reminders/{id}` : Hapus pengingat.
+
+### B. Recurring Bills (Tagihan Rutin)
+- `GET /api/bills` : List tagihan rutin.
+- `POST /api/bills` : Tambah tagihan rutin baru.
+  - Payload: `{ "name": "Wi-Fi Indihome", "amount": 350000, "due_date": "2026-08-10", "frequency": "monthly" }`
+- `GET /api/bills/{id}` : Detail tagihan.
+- `PUT /api/bills/{id}` : Update tagihan.
+- `DELETE /api/bills/{id}` : Hapus tagihan.
+
+### C. Budgets (Anggaran)
+- `GET /api/budgets` : List anggaran per kategori.
+- `POST /api/budgets` : Buat anggaran baru.
+  - Payload: `{ "category": "Makanan", "amount_limit": 2000000, "period": "monthly" }`
+- `GET /api/budgets/{id}` : Detail anggaran.
+- `PUT /api/budgets/{id}` : Update batas anggaran.
+- `DELETE /api/budgets/{id}` : Hapus anggaran.
+- `GET /api/budget/summary` : Summary total batas vs pemakaian anggaran.
+
+### D. Saving Goals (Target Tabungan)
+- `GET /api/saving-goals` : List target tabungan.
+- `POST /api/saving-goals` : Tambah target tabungan.
+  - Payload: `{ "name": "Dana Darurat", "target_amount": 50000000, "current_amount": 10000000, "target_date": "2026-12-31" }`
+- `GET /api/saving-goals/{id}` : Detail target tabungan.
+- `PUT /api/saving-goals/{id}` : Update target/progress.
+- `DELETE /api/saving-goals/{id}` : Hapus target tabungan.
+
+### E. Notifications
+- `GET /api/notifications` : List notifikasi.
+- `POST /api/notifications` : Injeksi notifikasi dari n8n.
+- `GET /api/notifications/{id}` : Detail notifikasi.
+- `PUT /api/notifications/{id}` : Tandai dibaca (`is_read: true`).
+- `DELETE /api/notifications/{id}` : Hapus notifikasi.
+
+---
+
+## 9. Modul AI Center (CRUD)
+
+Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi penulisan dan pembacaan memori/log AI oleh n8n.
+
+### A. AI Insights
+- **Route Utama:** `GET|POST /api/insights` (Alias: `/api/ai-insights`)
+- **Payload POST:**
 ```json
 {
-  "intent": "help"
+    "title": "Analisis Pengeluaran Mingguan",
+    "content": "Pengeluaran makanan meningkat 15% dibanding minggu lalu.",
+    "category": "expense_trend"
 }
 ```
 
-**Response:**
+### B. AI Predictions
+- **Route Utama:** `GET|POST /api/predictions`
+- **Payload POST:**
 ```json
 {
-  "success": true,
-  "message": "Intent 'help' berhasil diproses.",
-  "data": {
-    "intent": "help",
-    "reply_text": "🤖 **Panduan Penggunaan FinTrack AI Bot:**\n\n- *Mencatat pengeluaran/pemasukan*: Ketik 'Catat pengeluaran 50rb untuk makan'\n- *Lihat statistik*: Ketik 'Statistik bulan ini'\n- *Lihat laporan*: Ketik 'Laporan harian' / 'Laporan bulanan'\n- *Edit/Hapus*: Ketik 'Hapus transaksi ID 15'"
-  }
+    "type": "cashflow_forecast",
+    "prediction_value": "Diperkirakan saldo tersisa Rp 2.500.000 pada akhir bulan.",
+    "confidence_score": 92.5
+}
+```
+
+### C. AI Recommendations
+- **Route Utama:** `GET|POST /api/recommendations`
+- **Payload POST:**
+```json
+{
+    "context": "Penghematan Langganan",
+    "advice": "Batalkan langganan yang jarang dipakai untuk menghemat Rp 150.000/bulan."
+}
+```
+
+### D. AI Warnings
+- **Route Utama:** `GET|POST /api/warnings`
+- **Payload POST:**
+```json
+{
+    "severity": "high",
+    "message": "Peringatan! Pengeluaran kategori Makanan telah mencapai 90% dari batas anggaran."
+}
+```
+
+### E. AI Achievements
+- **Route Utama:** `GET|POST /api/achievements`
+- **Payload POST:**
+```json
+{
+    "badge": "Smart Saver",
+    "description": "Berhasil mempertahankan rasio tabungan di atas 30% selama 3 bulan berturut-turut!"
+}
+```
+
+### F. AI Memories (Vector Context)
+- **Route Utama:** `GET|POST /api/memories`
+- **Payload POST:**
+```json
+{
+    "key": "user_financial_goal",
+    "value": "Ingin membeli rumah dalam 5 tahun",
+    "relevance": 10
+}
+```
+
+### G. Chat History
+- **Route Utama:** `GET|POST /api/chat-history` (Alias: `/api/chat-histories`)
+- **Payload POST:**
+```json
+{
+    "user_message": "Berapa sisa budget makan saya?",
+    "bot_response": "Sisa budget makan Anda bulan ini adalah Rp 450.000.",
+    "intent": "budget"
+}
+```
+
+### H. Prompt Manager
+- **Route Utama:** `GET|POST /api/prompts`
+- **Payload POST:**
+```json
+{
+    "ai_role": "financial_advisor",
+    "instruction_template": "Kamu adalah asisten keuangan pribadi yang ramah dan bijak..."
+}
+```
+
+### I. AI Logs
+- **Route Utama:** `GET|POST /api/ai-logs`
+- **Payload POST:**
+```json
+{
+    "endpoint": "gemini-1.5-pro",
+    "duration_ms": 420,
+    "status": "success"
 }
 ```
 
 ---
 
-## 5. Panduan Integrasi n8n Workflow
+## 10. Panduan Integrasi n8n & Gemini
 
-1. **Node 1: Telegram Trigger** -> Menerima pesan teks dari user Telegram.
-2. **Node 2: OpenAI / Gemini AI Node (NLP Parser)** -> Memproses pesan teks pengguna dan mengonversinya menjadi JSON format intent (`create_transaction`, `statistics`, dll).
-3. **Node 3: HTTP Request Node** ->
-   - **Method**: `POST`
-   - **URL**: `http://127.0.0.1:8000/api/bot/execute`
-   - **Body Spec**: JSON (berisi output intent & parameters dari Node 2).
-4. **Node 4: Telegram Send Message Node** -> Mengirimkan kembali string `data.reply_text` yang diterima dari API ke user Telegram.
+### Langkah-langkah Integrasi Webhook Bot:
+1. **Telegram Webhook**: Pengguna mengirim pesan via Telegram → Diterima oleh Trigger Node n8n.
+2. **Gemini Intent Extraction**: Node n8n memanggil Gemini API dengan Prompt dari endpoint `GET /api/prompts` untuk menghasilkan skema JSON intent.
+3. **Laravel Dispatcher Execution**: Node HTTP Request n8n melakukan HTTP `POST` ke `http://your-domain.com/api/bot/execute` membawa payload:
+   ```json
+   {
+       "intent": "...",
+       "parameters": { ... }
+   }
+   ```
+4. **Respon ke Telegram**: n8n menerima respons `{ "success": true, "data": { ... } }` dan memformatnya menjadi pesan jawaban balikan ke Telegram user.
+
+---
+*Dokumentasi ini dibuat secara otomatis dan dikurasi sesuai standar Laravel 12 Enterprise Clean Architecture FinTrack AI OS.*
