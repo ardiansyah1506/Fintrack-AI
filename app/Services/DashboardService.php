@@ -8,7 +8,8 @@ use Carbon\Carbon;
 class DashboardService
 {
     public function __construct(
-        protected StatisticService $statisticService
+        protected StatisticService $statisticService,
+        protected \App\Contracts\Repositories\TransactionRepositoryInterface $transactionRepository
     ) {}
 
     /**
@@ -18,22 +19,16 @@ class DashboardService
     {
         $now = Carbon::now();
 
-        $totalIncome = (float) Transaction::where('type', 'income')->sum('amount');
-        $totalExpense = (float) Transaction::where('type', 'expense')->sum('amount');
+        $totalIncome = (float) $this->transactionRepository->query()->where('type', 'income')->sum('amount');
+        $totalExpense = (float) $this->transactionRepository->query()->where('type', 'expense')->sum('amount');
         $currentBalance = $totalIncome - $totalExpense;
 
-        $monthlyIncome = (float) Transaction::where('type', 'income')
-            ->whereYear('transaction_date', $now->year)
-            ->whereMonth('transaction_date', $now->month)
-            ->sum('amount');
+        $monthlyIncome = (float) $this->transactionRepository->sumByTypeAndMonth('income', $now->year, $now->month);
 
-        $monthlyExpense = (float) Transaction::where('type', 'expense')
-            ->whereYear('transaction_date', $now->year)
-            ->whereMonth('transaction_date', $now->month)
-            ->sum('amount');
+        $monthlyExpense = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $now->year, $now->month);
 
         $monthlyBalance = $monthlyIncome - $monthlyExpense;
-        $totalTransactionsCount = Transaction::count();
+        $totalTransactionsCount = $this->transactionRepository->countAll();
 
         return [
             'current_balance' => $currentBalance,
@@ -51,11 +46,7 @@ class DashboardService
      */
     public function getRecentTransactions(int $limit = 5)
     {
-        return Transaction::query()
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->limit($limit)
-            ->get();
+        return $this->transactionRepository->getRecent($limit);
     }
 
     /**

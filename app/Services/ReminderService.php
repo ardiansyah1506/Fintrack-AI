@@ -2,31 +2,30 @@
 
 namespace App\Services;
 
-use App\Models\Reminder;
-use Illuminate\Database\Eloquent\Collection;
+use App\Contracts\Repositories\ReminderRepositoryInterface;
 
 class ReminderService
 {
-    public function getAllReminders(): Collection
+    protected $repository;
+
+    public function __construct(ReminderRepositoryInterface $repository)
     {
-        return Reminder::orderBy('due_date', 'asc')->get();
+        $this->repository = $repository;
     }
 
-    public function createReminder(array $data): Reminder
-    {
-        return Reminder::create($data);
+    public function getAll() {
+        return $this->repository->all();
     }
 
-    public function updateReminder($id, array $data): Reminder
-    {
-        $reminder = Reminder::findOrFail($id);
-        $reminder->update($data);
-        return $reminder;
+    public function create(array $data) {
+        return $this->repository->create($data);
     }
 
-    public function deleteReminder($id): void
-    {
-        $reminder = Reminder::findOrFail($id);
-        $reminder->delete();
+    public function update($id, array $data) {
+        return $this->repository->update($id, $data);
+    }
+
+    public function delete($id) {
+        return $this->repository->delete($id);
     }
 }

@@ -10,25 +10,25 @@ class ReminderController extends Controller
     public function index()
     {
         return view('reminders.index', [
-            'reminders' => \App\Models\Reminder::latest()->get()
+            'reminders' => $this->service->getAll()
         ]);
     }
 
     public function store(\Illuminate\Http\Request $request)
     {
-        \App\Models\Reminder::create($request->all());
+        $this->service->create($request->all());
         return back()->with('success', 'Reminder berhasil ditambahkan.');
     }
 
     public function update(\Illuminate\Http\Request $request, $id)
     {
-        \App\Models\Reminder::findOrFail($id)->update($request->all());
+        $this->service->update($id, $request->all());
         return back()->with('success', 'Reminder berhasil diupdate.');
     }
 
     public function destroy($id)
     {
-        \App\Models\Reminder::findOrFail($id)->delete();
+        $this->service->delete($id);
         return back()->with('success', 'Reminder berhasil dihapus.');
     }
 }

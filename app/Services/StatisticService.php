@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class StatisticService
 {
+    public function __construct(protected \App\Contracts\Repositories\TransactionRepositoryInterface $transactionRepository) {}
+
     /**
      * Get Income vs Expense comparisons for the last 6 months.
      */
@@ -22,15 +24,9 @@ class StatisticService
             $month = Carbon::now()->subMonths($i);
             $labels[] = $month->translatedFormat('M Y');
 
-            $income = Transaction::where('type', 'income')
-                ->whereYear('transaction_date', $month->year)
-                ->whereMonth('transaction_date', $month->month)
-                ->sum('amount');
+            $income = $this->transactionRepository->sumByTypeAndMonth('income', $month->year, $month->month);
 
-            $expense = Transaction::where('type', 'expense')
-                ->whereYear('transaction_date', $month->year)
-                ->whereMonth('transaction_date', $month->month)
-                ->sum('amount');
+            $expense = $this->transactionRepository->sumByTypeAndMonth('expense', $month->year, $month->month);
 
             $incomeData[] = (float) $income;
             $expenseData[] = (float) $expense;
@@ -64,13 +60,7 @@ class StatisticService
     {
         $now = Carbon::now();
 
-        $expenses = Transaction::where('type', 'expense')
-            ->whereYear('transaction_date', $now->year)
-            ->whereMonth('transaction_date', $now->month)
-            ->select('category', DB::raw('SUM(amount) as total'))
-            ->groupBy('category')
-            ->orderByDesc('total')
-            ->get();
+        $expenses = $this->transactionRepository->getExpensesByCategoryMonth($now->year, $now->month);
 
         $labels = [];
         $data = [];
@@ -121,13 +111,9 @@ class StatisticService
             $weekStart = $startOfMonth->copy()->addWeeks($week);
             $weekEnd = $weekStart->copy()->addDays(6)->endOfDay();
 
-            $incomeData[$week] = (float) Transaction::where('type', 'income')
-                ->whereBetween('transaction_date', [$weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d')])
-                ->sum('amount');
+            $incomeData[$week] = (float) $this->transactionRepository->sumByTypeAndDateRange('income', $weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'));
 
-            $expenseData[$week] = (float) Transaction::where('type', 'expense')
-                ->whereBetween('transaction_date', [$weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d')])
-                ->sum('amount');
+            $expenseData[$week] = (float) $this->transactionRepository->sumByTypeAndDateRange('expense', $weekStart->format('Y-m-d'), $weekEnd->format('Y-m-d'));
         }
 
         return [
@@ -168,15 +154,9 @@ class StatisticService
             $month = Carbon::create($year, $m, 1);
             $labels[] = $month->translatedFormat('M');
 
-            $incomeData[] = (float) Transaction::where('type', 'income')
-                ->whereYear('transaction_date', $year)
-                ->whereMonth('transaction_date', $m)
-                ->sum('amount');
+            $incomeData[] = (float) $this->transactionRepository->sumByTypeAndMonth('income', $year, $m);
 
-            $expenseData[] = (float) Transaction::where('type', 'expense')
-                ->whereYear('transaction_date', $year)
-                ->whereMonth('transaction_date', $m)
-                ->sum('amount');
+            $expenseData[] = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $year, $m);
         }
 
         return [

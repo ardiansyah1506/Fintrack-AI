@@ -2,59 +2,51 @@
 
 namespace App\Services;
 
-use App\Models\Budget;
-use App\Models\Transaction;
-use Illuminate\Database\Eloquent\Collection;
+use App\Contracts\Repositories\BudgetRepositoryInterface;
+use App\Contracts\Repositories\TransactionRepositoryInterface;
 use Carbon\Carbon;
 
 class BudgetService
 {
-    public function getAllBudgets(): Collection
-    {
-        return Budget::all();
+    protected $budgetRepository;
+    protected $transactionRepository;
+
+    public function __construct(BudgetRepositoryInterface $budgetRepository, TransactionRepositoryInterface $transactionRepository) {
+        $this->budgetRepository = $budgetRepository;
+        $this->transactionRepository = $transactionRepository;
     }
 
-    public function createBudget(array $data): Budget
-    {
-        return Budget::create($data);
+    public function getAllBudgets() {
+        return $this->budgetRepository->all();
     }
 
-    public function updateBudget($id, array $data): Budget
-    {
-        $budget = Budget::findOrFail($id);
-        $budget->update($data);
-        return $budget;
+    public function createBudget(array $data) {
+        return $this->budgetRepository->create($data);
     }
 
-    public function deleteBudget($id): void
-    {
-        $budget = Budget::findOrFail($id);
-        $budget->delete();
+    public function updateBudget($id, array $data) {
+        return $this->budgetRepository->update($id, $data);
     }
 
-    public function getBudgetSummary()
-    {
-        $budgets = Budget::all();
+    public function deleteBudget($id) {
+        $this->budgetRepository->delete($id);
+    }
+
+    public function getBudgetSummary() {
+        $budgets = $this->budgetRepository->all();
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth()->format('Y-m-d');
         $endOfMonth = $now->copy()->endOfMonth()->format('Y-m-d');
 
         $summary = [];
         foreach ($budgets as $budget) {
-            $totalExpense = Transaction::where('category', $budget->category)
-                ->where('type', 'expense')
-                ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                ->sum('amount');
-
+            $totalExpense = $this->transactionRepository->getTotalExpenseByCategoryAndDate($budget->category, $startOfMonth, $endOfMonth);
             $remaining = max(0, $budget->amount - $totalExpense);
             $percentage = $budget->amount > 0 ? min(100, round(($totalExpense / $budget->amount) * 100, 2)) : 0;
 
             $status_color = 'green';
-            if ($percentage >= 90) {
-                $status_color = 'red';
-            } elseif ($percentage >= 50) {
-                $status_color = 'yellow';
-            }
+            if ($percentage >= 90) { $status_color = 'red'; }
+            elseif ($percentage >= 50) { $status_color = 'yellow'; }
 
             $summary[] = [
                 'id' => $budget->id,
@@ -66,7 +58,6 @@ class BudgetService
                 'status_color' => $status_color
             ];
         }
-
         return $summary;
     }
 }

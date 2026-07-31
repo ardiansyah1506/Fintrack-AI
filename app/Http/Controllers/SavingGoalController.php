@@ -6,28 +6,33 @@ use Illuminate\Http\Request;
 
 class SavingGoalController extends Controller
 {
+    protected $service;
+    public function __construct(\App\Services\SavingGoalService $service) {
+        $this->service = $service;
+    }
+
     public function index()
     {
         return view('saving-goals.index', [
-            'goals' => SavingGoal::latest()->get()
+            'goals' => $this->service->getAll()
         ]);
     }
 
     public function store(Request $request)
     {
-        SavingGoal::create($request->all());
+        $this->service->create($request->all());
         return back()->with('success', 'Saving Goal berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
-        SavingGoal::findOrFail($id)->update($request->all());
+        $this->service->update($id, $request->all());
         return back()->with('success', 'Saving Goal berhasil diupdate.');
     }
 
     public function destroy($id)
     {
-        SavingGoal::findOrFail($id)->delete();
+        $this->service->delete($id);
         return back()->with('success', 'Saving Goal berhasil dihapus.');
     }
 }

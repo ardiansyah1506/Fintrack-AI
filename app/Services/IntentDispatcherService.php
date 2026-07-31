@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use InvalidArgumentException;
-use App\Intents\IntentInterface;
+use App\Intents\Contracts\IntentInterface;
 
 class IntentDispatcherService
 {
@@ -39,7 +39,8 @@ class IntentDispatcherService
         'create_budget' => \App\Intents\Budgets\CreateBudgetIntent::class,
         'update_budget' => \App\Intents\Budgets\UpdateBudgetIntent::class,
         'delete_budget' => \App\Intents\Budgets\DeleteBudgetIntent::class,
-        'budget_summary' => \App\Intents\Budgets\BudgetSummaryIntent::class,
+        'budget' => \App\Intents\Budgets\BudgetSummaryIntent::class,
+        'balance' => \App\Intents\Budgets\BudgetSummaryIntent::class,
         
         // Saving Goals Module
         'create_saving_goal' => \App\Intents\SavingGoals\CreateSavingGoalIntent::class,

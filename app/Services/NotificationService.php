@@ -2,36 +2,30 @@
 
 namespace App\Services;
 
-use App\Models\Notification;
-use Illuminate\Database\Eloquent\Collection;
-use Carbon\Carbon;
+use App\Contracts\Repositories\NotificationRepositoryInterface;
 
 class NotificationService
 {
-    public function getAllNotifications(): Collection
+    protected $repository;
+
+    public function __construct(NotificationRepositoryInterface $repository)
     {
-        return Notification::orderBy('created_at', 'desc')->get();
+        $this->repository = $repository;
     }
 
-    public function getUnreadNotifications(): Collection
-    {
-        return Notification::whereNull('read_at')->orderBy('created_at', 'desc')->get();
+    public function getAll() {
+        return $this->repository->all();
     }
 
-    public function createNotification(array $data): Notification
-    {
-        return Notification::create($data);
+    public function create(array $data) {
+        return $this->repository->create($data);
     }
 
-    public function markAsRead($id): Notification
-    {
-        $notification = Notification::findOrFail($id);
-        $notification->update(['read_at' => Carbon::now()]);
-        return $notification;
+    public function update($id, array $data) {
+        return $this->repository->update($id, $data);
     }
 
-    public function markAllAsRead(): void
-    {
-        Notification::whereNull('read_at')->update(['read_at' => Carbon::now()]);
+    public function delete($id) {
+        return $this->repository->delete($id);
     }
 }

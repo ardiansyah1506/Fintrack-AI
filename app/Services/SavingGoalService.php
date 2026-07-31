@@ -2,31 +2,30 @@
 
 namespace App\Services;
 
-use App\Models\SavingGoal;
-use Illuminate\Database\Eloquent\Collection;
+use App\Contracts\Repositories\SavingGoalRepositoryInterface;
 
 class SavingGoalService
 {
-    public function getAllGoals(): Collection
+    protected $repository;
+
+    public function __construct(SavingGoalRepositoryInterface $repository)
     {
-        return SavingGoal::all();
+        $this->repository = $repository;
     }
 
-    public function createGoal(array $data): SavingGoal
-    {
-        return SavingGoal::create($data);
+    public function getAll() {
+        return $this->repository->all();
     }
 
-    public function updateGoal($id, array $data): SavingGoal
-    {
-        $goal = SavingGoal::findOrFail($id);
-        $goal->update($data);
-        return $goal;
+    public function create(array $data) {
+        return $this->repository->create($data);
     }
 
-    public function deleteGoal($id): void
-    {
-        $goal = SavingGoal::findOrFail($id);
-        $goal->delete();
+    public function update($id, array $data) {
+        return $this->repository->update($id, $data);
+    }
+
+    public function delete($id) {
+        return $this->repository->delete($id);
     }
 }
