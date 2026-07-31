@@ -1,51 +1,15 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
-use App\Models\AiPrediction;
-use App\Http\Requests\StoreAiPredictionRequest;
-use App\Http\Requests\UpdateAiPredictionRequest;
-
-class AiPredictionController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreAiPredictionRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(AiPrediction $aiPrediction)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateAiPredictionRequest $request, AiPrediction $aiPrediction)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(AiPrediction $aiPrediction)
-    {
-        //
-    }
+use Illuminate\Http\Request;
+use App\Http\Requests\AiPredictionRequest;
+use App\Services\AiPredictionService;
+use App\Http\Resources\AiPredictionResource;
+class AiPredictionController extends Controller {
+    public function __construct(protected AiPredictionService $service) {}
+    public function index(Request $request) { return AiPredictionResource::collection($this->service->getAll($request->only('search'), 10)); }
+    public function store(AiPredictionRequest $request) { return new AiPredictionResource($this->service->create($request->validated())); }
+    public function show($id) { return new AiPredictionResource(app(\App\Contracts\Repositories\AiPredictionRepositoryInterface::class)->find($id)); }
+    public function update(AiPredictionRequest $request, $id) { return new AiPredictionResource($this->service->update($id, $request->validated())); }
+    public function destroy($id) { $this->service->delete($id); return response()->json(['message' => 'Deleted']); }
 }

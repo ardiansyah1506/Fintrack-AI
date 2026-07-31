@@ -16,19 +16,19 @@ class BudgetService
         $this->transactionRepository = $transactionRepository;
     }
 
-    public function getAllBudgets() {
-        return $this->budgetRepository->all();
+    public function getAll(array $filters = [], int $perPage = 10) {
+        return $this->budgetRepository->getPaginated($filters, $perPage);
     }
 
-    public function createBudget(array $data) {
+    public function create(array $data) {
         return $this->budgetRepository->create($data);
     }
 
-    public function updateBudget($id, array $data) {
+    public function update($id, array $data) {
         return $this->budgetRepository->update($id, $data);
     }
 
-    public function deleteBudget($id) {
+    public function delete($id) {
         $this->budgetRepository->delete($id);
     }
 

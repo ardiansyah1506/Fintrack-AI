@@ -1,9 +1,9 @@
 <?php
 namespace App\Repositories\Eloquent;
-use App\Contracts\Repositories\AiMemoryRepositoryInterface;
-class AiMemoryRepository implements AiMemoryRepositoryInterface {
+use App\Contracts\Repositories\AiInsightRepositoryInterface;
+class AiInsightRepository implements AiInsightRepositoryInterface {
     protected $model;
-    public function __construct(\App\Models\AiMemory $model = null) { $class = '\App\Models\AiMemory'; $this->model = $model ?? new $class; }
+    public function __construct(\App\Models\AiInsight $model = null) { $class = '\App\Models\AiInsight'; $this->model = $model ?? new $class; }
     public function all() { return $this->model->all(); }
     public function find($id) { return $this->model->findOrFail($id); }
     public function create(array $data) { return $this->model->create($data); }

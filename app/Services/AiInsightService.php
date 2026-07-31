@@ -1,25 +1,10 @@
 <?php
-
 namespace App\Services;
-
-use App\Models\AiInsight;
-use Illuminate\Database\Eloquent\Collection;
-
-class AiInsightService
-{
-    public function getAllInsights(): Collection
-    {
-        return AiInsight::orderBy('generated_at', 'desc')->get();
-    }
-
-    public function createInsight(array $data): AiInsight
-    {
-        return AiInsight::create($data);
-    }
-
-    public function deleteInsight($id): void
-    {
-        $insight = AiInsight::findOrFail($id);
-        $insight->delete();
-    }
+use App\Contracts\Repositories\AiInsightRepositoryInterface;
+class AiInsightService {
+    public function __construct(protected AiInsightRepositoryInterface $repository) {}
+    public function getAll(array $filters = [], int $perPage = 10) { return $this->repository->getPaginated($filters, $perPage); }
+    public function create(array $data) { return $this->repository->create($data); }
+    public function update($id, array $data) { return $this->repository->update($id, $data); }
+    public function delete($id) { return $this->repository->delete($id); }
 }

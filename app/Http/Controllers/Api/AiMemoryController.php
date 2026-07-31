@@ -1,51 +1,15 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
-use App\Models\AiMemory;
-use App\Http\Requests\StoreAiMemoryRequest;
-use App\Http\Requests\UpdateAiMemoryRequest;
-
-class AiMemoryController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreAiMemoryRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(AiMemory $aiMemory)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateAiMemoryRequest $request, AiMemory $aiMemory)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(AiMemory $aiMemory)
-    {
-        //
-    }
+use Illuminate\Http\Request;
+use App\Http\Requests\AiMemoryRequest;
+use App\Services\AiMemoryService;
+use App\Http\Resources\AiMemoryResource;
+class AiMemoryController extends Controller {
+    public function __construct(protected AiMemoryService $service) {}
+    public function index(Request $request) { return AiMemoryResource::collection($this->service->getAll($request->only('search'), 10)); }
+    public function store(AiMemoryRequest $request) { return new AiMemoryResource($this->service->create($request->validated())); }
+    public function show($id) { return new AiMemoryResource(app(\App\Contracts\Repositories\AiMemoryRepositoryInterface::class)->find($id)); }
+    public function update(AiMemoryRequest $request, $id) { return new AiMemoryResource($this->service->update($id, $request->validated())); }
+    public function destroy($id) { $this->service->delete($id); return response()->json(['message' => 'Deleted']); }
 }

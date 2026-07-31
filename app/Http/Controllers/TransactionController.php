@@ -33,7 +33,7 @@ class TransactionController extends Controller
 
         $transactions = $this->transactionService->getPaginatedTransactions($filters, 10);
         $summary = $this->transactionService->getFilteredSummary($filters);
-        $categories = $this->categoryService->getAllCategories();
+        $categories = $this->categoryService->getAll();
 
         return view('transactions.index', compact('transactions', 'summary', 'categories', 'filters'));
     }

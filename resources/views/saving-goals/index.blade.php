@@ -32,7 +32,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100/80 text-slate-700">
-                    @forelse($goals as $goal)
+                    @forelse($saving_goals as $goal)
                     <tr class="hover:bg-slate-50/50">
                         <td class="px-6 py-4 font-medium flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
