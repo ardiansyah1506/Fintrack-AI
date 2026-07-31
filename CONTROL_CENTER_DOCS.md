@@ -265,3 +265,46 @@ Secara teknis:
 - **UI Responsif**: Diimplementasi menggunakan kombinasi Blade Components, Tailwind CSS, dan Alpine.js Modal (x-show).
 - **Synchronized Data**: Data yang ditambah/diupdate melalui form di website akan secara instan mengubah _knowledge scope_ dan _trigger-rules_ yang akan dibaca oleh N8n melalui REST API.
 - **Controller Terpadu**: Di-handle pada level App\Http\Controllers\BudgetController, RecurringBillController, SavingGoalController, dan ReminderController.
+
+## 🧠 6. Dokumentasi Modul AI Center Tersinkronisasi N8N
+
+Keseluruhan **8 Modul AI Center** terbaru telah dipetakan menjadi endpoints mandiri, terikat dengan `FormRequest` validation dan `REST API Resources`. Parameter input sifatnya statis berdasarkan nama tabel. N8N dapat me-record JSON secara leluasa.
+
+### Endpoints REST API Utama (AI Center)
+Semua route mendukung skema: `GET` (List all search & paginate), `POST` (Create/Inject data dari bot), `GET /{id}` (Detail), `PUT /{id}` (Update Data), `DELETE /{id}`.
+
+1. **AI Insights**
+   - **Route:** `/api/ai-insights`
+   - **Asumsi Parameter POST:** json `{ "title": "Insight keuangan 1", "content": "Rasio tabungan 30%" }`
+   
+2. **AI Predictions**
+   - **Route:** `/api/predictions`
+   - **Asumsi Parameter POST:** json `{ "type": "cashflow", "prediction_value": "Minus 200k lusa", "confidence_score": 85 }`
+
+3. **AI Recommendations**
+   - **Route:** `/api/recommendations`
+   - **Asumsi Parameter POST:** json `{ "context": "Budget makanan", "advice": "Kurangi gofood" }`
+
+4. **AI Warnings**
+   - **Route:** `/api/warnings`
+   - **Asumsi Parameter POST:** json `{ "severity": "high", "message": "Resiko gagal bayar asuransi bulan ini" }`
+
+5. **AI Achievements**
+   - **Route:** `/api/achievements`
+   - **Asumsi Parameter POST:** json `{ "badge": "Gold Saver", "description": "Tercapai simpanan 10 Juta!" }`
+
+6. **AI Memories (Context Vector Database)**
+   - **Route:** `/api/memories`
+   - **Asumsi Parameter POST:** json `{ "key": "favorite_food", "value": "Suka nasi padang", "relevance": 9 }`
+
+7. **Prompt Manager**
+   - **Route:** `/api/prompts`
+   - **Asumsi Parameter POST:** json `{ "ai_role": "analyst", "instruction_template": "Berikan rekomendasi keuangan..." }`
+
+8. **AI Logs (Tracking request duration)**
+   - **Route:** `/api/ai-logs`
+   - **Asumsi Parameter POST:** json `{ "endpoint": "n8n/gemini", "duration_ms": 1500, "status": "success" }`
+
+> **Note Validasi:** Jika n8n mem-posting data yang salah atau kurang argumen `required`, server secara otomatis mem-bounce request dengan JSON tipe HTTP 422: `{"message": "The given data was invalid", "errors": {"title": ["The title field is required."]}}`.
+
+## ✅ Status Sistem Refactor: STABIL (100% Backward & Forward Ready)
