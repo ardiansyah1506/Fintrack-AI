@@ -35,4 +35,14 @@ Route::name('api.')->group(function () {
 
     // n8n / Telegram Bot Integration Endpoint
     Route::post('/bot/execute', [BotController::class, 'execute'])->name('bot.execute');
+
+    // Control Center API Endpoints
+    Route::apiResource('reminders', \App\Http\Controllers\Api\ReminderController::class);
+    Route::get('/bills', [\App\Http\Controllers\Api\RecurringBillController::class, 'index']);
+    Route::get('/budget/summary', [\App\Http\Controllers\Api\BudgetController::class, 'summary']);
+    Route::get('/saving-goals', [\App\Http\Controllers\Api\SavingGoalController::class, 'index']);
+    Route::get('/dashboard/ai', [\App\Http\Controllers\Api\DashboardController::class, 'aiSummary']);
+    Route::get('/insights', [\App\Http\Controllers\Api\AiInsightController::class, 'index']);
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::get('/telegram/status', [\App\Http\Controllers\Api\TelegramStatusController::class, 'index']);
 });

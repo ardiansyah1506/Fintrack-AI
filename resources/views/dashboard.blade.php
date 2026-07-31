@@ -1,145 +1,122 @@
-<x-app-layout title="Dashboard Keuangan - FinTrack AI">
-    <x-slot name="header">Dashboard Keuangan</x-slot>
+<x-app-layout title="Control Center - FinTrack AI">
+    <x-slot name="header">Control Center</x-slot>
 
-    <div class="space-y-6">
-        <!-- 5 Summary Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Saldo Saat Ini -->
-            <x-card padding="false" class="border-l-4 border-l-indigo-600">
+    <div class="space-y-6 text-slate-800 font-sans">
+        <!-- Quick Actions -->
+        <div class="flex flex-wrap gap-3 mb-6">
+            <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-2xl shadow-sm text-sm font-semibold transition">
+                <i class="fa-solid fa-plus mr-2"></i> Tambah Transaksi
+            </button>
+            <button class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-2xl shadow-sm text-sm font-semibold transition">
+                <i class="fa-solid fa-bell mr-2"></i> Tambah Reminder
+            </button>
+            <button class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-2xl shadow-sm text-sm font-semibold transition">
+                <i class="fa-solid fa-wallet mr-2"></i> Tambah Budget
+            </button>
+            <button class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-5 py-2.5 rounded-2xl shadow-sm text-sm font-semibold transition">
+                <i class="fa-solid fa-bullseye mr-2"></i> Tambah Target
+            </button>
+        </div>
+        
+        <!-- Summary Widgets -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            <x-card padding="false" class="rounded-3xl shadow-sm border-0 bg-white">
                 <div class="p-5">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saldo Saat Ini</p>
-                        <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                            <i class="fa-solid fa-wallet text-sm"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold {{ $summary['current_balance'] >= 0 ? 'text-slate-900' : 'text-rose-600' }} mt-2">
-                        {{ formatCurrency($summary['current_balance']) }}
-                    </h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Akumulasi seluruh transaksi</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Saldo</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-2">Rp 12.000.000</h3>
                 </div>
             </x-card>
-
-            <!-- Income Bulan Ini -->
-            <x-card padding="false" class="border-l-4 border-l-emerald-500">
+            <x-card padding="false" class="rounded-3xl shadow-sm border-0 bg-white">
                 <div class="p-5">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Income Bulan Ini</p>
-                        <div class="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                            <i class="fa-solid fa-arrow-down-left text-sm"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-emerald-600 mt-2">
-                        {{ formatCurrency($summary['monthly_income']) }}
-                    </h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Bulan {{ date('F Y') }}</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Income</p>
+                    <h3 class="text-2xl font-bold text-emerald-500 mt-2">Rp 15.000.000</h3>
                 </div>
             </x-card>
-
-            <!-- Expense Bulan Ini -->
-            <x-card padding="false" class="border-l-4 border-l-rose-500">
+            <x-card padding="false" class="rounded-3xl shadow-sm border-0 bg-white">
                 <div class="p-5">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Expense Bulan Ini</p>
-                        <div class="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
-                            <i class="fa-solid fa-arrow-up-right text-sm"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-rose-600 mt-2">
-                        {{ formatCurrency($summary['monthly_expense']) }}
-                    </h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Bulan {{ date('F Y') }}</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Expense</p>
+                    <h3 class="text-2xl font-bold text-rose-500 mt-2">Rp 3.000.000</h3>
                 </div>
             </x-card>
-
-            <!-- Selisih Income vs Expense -->
-            <x-card padding="false" class="border-l-4 border-l-amber-500">
+            <x-card padding="false" class="rounded-3xl shadow-sm border-0 bg-white">
                 <div class="p-5">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Selisih Bulan Ini</p>
-                        <div class="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                            <i class="fa-solid fa-scale-balanced text-sm"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold {{ $summary['monthly_balance'] >= 0 ? 'text-emerald-600' : 'text-rose-600' }} mt-2">
-                        {{ formatCurrency($summary['monthly_balance']) }}
-                    </h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Net Cashflow Bulan Ini</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Bills Due</p>
+                    <h3 class="text-2xl font-bold text-amber-500 mt-2">2 Tagihan</h3>
                 </div>
             </x-card>
-
-            <!-- Total Transaksi -->
-            <x-card padding="false" class="border-l-4 border-l-purple-500">
+            <x-card padding="false" class="rounded-3xl shadow-sm border-0 bg-white">
                 <div class="p-5">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jumlah Transaksi</p>
-                        <div class="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
-                            <i class="fa-solid fa-receipt text-sm"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800 mt-2">
-                        {{ $summary['total_transactions'] }} Data
-                    </h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Tercatat di sistem</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Reminder Today</p>
+                    <h3 class="text-2xl font-bold text-indigo-500 mt-2">1 Tugas</h3>
                 </div>
             </x-card>
         </div>
 
-        <!-- Main Analytics Chart Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Income vs Expense Chart -->
-            <x-card title="Pemasukan vs Pengeluaran (6 Bulan)" subtitle="Perbandingan arus kas bulanan" class="lg:col-span-2">
-                <x-chart id="incomeVsExpenseChart" type="bar" :data="$income_vs_expense_chart" height="300" />
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Budget Progress -->
+            <x-card title="Budget Progress" class="rounded-3xl shadow-sm border-0 bg-white" padding="false">
+                 <div class="p-6 space-y-5">
+                     <div>
+                         <div class="flex justify-between text-sm text-slate-700 font-medium mb-2">
+                             <span>Makanan</span>
+                             <span class="text-emerald-500">Sisa Rp1.500.000 (75%)</span>
+                         </div>
+                         <div class="w-full bg-slate-100 rounded-full h-3">
+                             <div class="bg-emerald-400 h-3 rounded-full" style="width: 25%"></div>
+                         </div>
+                     </div>
+                     <div>
+                         <div class="flex justify-between text-sm text-slate-700 font-medium mb-2">
+                             <span>Transportasi</span>
+                             <span class="text-amber-500">Sisa Rp100.000 (20%)</span>
+                         </div>
+                         <div class="w-full bg-slate-100 rounded-full h-3">
+                             <div class="bg-amber-400 h-3 rounded-full" style="width: 80%"></div>
+                         </div>
+                     </div>
+                 </div>
             </x-card>
-
-            <!-- Expense by Category Chart -->
-            <x-card title="Pengeluaran per Kategori" subtitle="Distribusi pengeluaran bulan ini">
-                <x-chart id="expenseByCategoryChart" type="doughnut" :data="$expense_by_category_chart" height="300" />
+            
+            <!-- Saving Goal Progress -->
+            <x-card title="Saving Goal Progress" class="rounded-3xl shadow-sm border-0 bg-white" padding="false">
+                 <div class="p-6 space-y-5">
+                     <div>
+                         <div class="flex justify-between text-sm text-slate-700 font-medium mb-2">
+                             <span class="flex items-center gap-2"><i class="fa-solid fa-plane text-slate-400"></i> Liburan Jepang</span>
+                             <span class="text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-lg">60% Tercapai</span>
+                         </div>
+                         <div class="w-full bg-slate-100 rounded-full h-3">
+                             <div class="bg-emerald-400 h-3 rounded-full" style="width: 60%"></div>
+                         </div>
+                         <p class="text-xs text-slate-400 mt-2 text-right">Target: Rp 20.000.000</p>
+                     </div>
+                 </div>
             </x-card>
         </div>
-
-        <!-- Secondary Charts & Feed -->
+        
+        <!-- Top Expense Category & AI Insights Quick View -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Weekly Trend Chart -->
-            <x-card title="Trend Transaksi Mingguan" subtitle="Pergerakan cashflow per minggu bulan ini">
-                <x-chart id="weeklyTrendChart" type="line" :data="$weekly_trend_chart" height="260" />
+            <x-card title="Top Expense Category" class="rounded-3xl shadow-sm border-0 bg-white">
+                 <div class="flex items-center gap-4 mt-2">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex justify-center items-center">
+                        <i class="fa-solid fa-car text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Transportasi</h4>
+                        <p class="text-sm text-slate-500">Rp 5.000.000</p>
+                    </div>
+                 </div>
             </x-card>
-
-            <!-- Monthly Trend Chart -->
-            <x-card title="Trend Transaksi Bulanan" subtitle="Evaluasi pergerakan sepanjang tahun">
-                <x-chart id="monthlyTrendChart" type="line" :data="$monthly_trend_chart" height="260" />
-            </x-card>
-
-            <!-- Recent Transactions Widget -->
-            <x-card title="Transaksi Terbaru" subtitle="5 catatan transaksi terakhir" padding="false">
-                <x-slot name="action">
-                    <a href="{{ route('transactions.index') }}" class="text-xs font-semibold text-indigo-600 hover:underline">
-                        Lihat Semua <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </a>
-                </x-slot>
-
-                <div class="divide-y divide-slate-100">
-                    @forelse($recent_transactions as $tx)
-                        <div class="p-4 flex items-center justify-between gap-3 hover:bg-slate-50/50 transition">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs bg-indigo-500">
-                                    <i class="fa-solid fa-folder text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <h4 class="text-xs font-semibold text-slate-800 truncate">{{ $tx->description }}</h4>
-                                    <p class="text-[11px] text-slate-400">{{ formatDate($tx->transaction_date) }} • {{ $tx->category }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right shrink-0">
-                                <span class="text-xs font-bold {{ $tx->type === 'income' ? 'text-emerald-600' : 'text-rose-600' }}">
-                                    {{ $tx->type === 'income' ? '+' : '-' }} {{ formatCurrency($tx->amount) }}
-                                </span>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="p-6 text-center text-xs text-slate-400">Belum ada transaksi.</div>
-                    @endforelse
-                </div>
+            <x-card title="AI Insights" class="rounded-3xl shadow-sm border-0 bg-white lg:col-span-2" padding="false">
+                 <div class="p-6">
+                     <div class="flex gap-4 p-5 bg-emerald-50/70 border border-emerald-100 text-emerald-900 rounded-3xl text-sm leading-relaxed">
+                         <div class="text-2xl text-emerald-500"><i class="fa-solid fa-sparkles"></i></div>
+                         <div>
+                            <h4 class="font-bold mb-1 text-emerald-700">Insight Mingguan</h4>
+                            <p>Pengeluaran transportasi Anda naik 20% bulan ini. N8n AI merekomendasikan untuk beralih ke transportasi umum sedikitnya 2 hari seminggu untuk mempertahankan target Budget Anda.</p>
+                         </div>
+                     </div>
+                 </div>
             </x-card>
         </div>
     </div>

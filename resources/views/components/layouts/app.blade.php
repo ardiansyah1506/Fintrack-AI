@@ -25,11 +25,11 @@
                     },
                     colors: {
                         brand: {
-                            50: '#f0f3ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
                         }
                     }
                 }
@@ -67,12 +67,12 @@
             <!-- Logo Header -->
             <div class="h-20 px-6 flex items-center justify-between border-b border-slate-100">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
-                        <i class="fa-solid fa-wallet text-lg"></i>
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/30">
+                        <i class="fa-solid fa-leaf text-lg"></i>
                     </div>
                     <div>
-                        <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 bg-clip-text text-transparent">FinTrack<span class="text-indigo-600">AI</span></span>
-                        <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Personal Finance</span>
+                        <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-800 bg-clip-text text-transparent">FinTrack<span class="text-emerald-600">AI</span></span>
+                        <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Control Center</span>
                     </div>
                 </a>
                 <button x-on:click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600">
@@ -82,42 +82,72 @@
 
             <!-- Navigation Links -->
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('dashboard') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-chart-pie text-base w-5 text-center"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{{ route('transactions.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('transactions.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-solid fa-arrow-right-arrow-left text-base w-5 text-center"></i>
+                <a href="{{ route('transactions.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('transactions.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-wallet text-base w-5 text-center"></i>
                     <span>Transaksi</span>
                 </a>
+                
+                <a href="{{ route('reminders.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('reminders.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-bell text-base w-5 text-center"></i>
+                    <span>Reminders</span>
+                </a>
+                
+                <a href="{{ route('bills.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('bills.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
+                    <span>Recurring Bills</span>
+                </a>
+                
+                <a href="{{ route('budgets.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('budgets.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-chart-line text-base w-5 text-center"></i>
+                    <span>Budgeting</span>
+                </a>
+                
+                <a href="{{ route('saving-goals.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('saving-goals.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-bullseye text-base w-5 text-center"></i>
+                    <span>Saving Goals</span>
+                </a>
+                
+                <a href="{{ route('ai-insights.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('ai-insights.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-brain text-base w-5 text-center"></i>
+                    <span>AI Insights</span>
+                </a>
+                
+                <a href="{{ route('notifications.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('notifications.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-envelope text-base w-5 text-center"></i>
+                    <span>Notifications</span>
+                </a>
+                
+                <a href="{{ route('telegram.config') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('telegram.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-brands fa-telegram text-base w-5 text-center"></i>
+                    <span>Telegram Config</span>
+                </a>
 
-                <a href="{{ route('categories.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('categories.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                <a href="{{ route('categories.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('categories.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-layer-group text-base w-5 text-center"></i>
                     <span>Kategori</span>
                 </a>
 
-                <a href="{{ route('reports.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('reports.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-solid fa-file-lines text-base w-5 text-center"></i>
-                    <span>Laporan</span>
-                </a>
-
-                <a href="{{ route('settings.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('settings.*') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                <a href="{{ route('settings.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('settings.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
                     <span>Pengaturan</span>
                 </a>
             </nav>
 
             <!-- Telegram / n8n Ready Indicator Badge -->
-            <div class="p-4 mx-4 mb-4 rounded-2xl bg-gradient-to-br from-indigo-900/90 to-slate-900 text-white shadow-sm border border-indigo-700/40">
+            <div class="p-4 mx-4 mb-4 rounded-2xl bg-gradient-to-br from-emerald-900/90 to-slate-900 text-white shadow-sm border border-emerald-700/40">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="relative flex h-2.5 w-2.5">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
-                    <span class="text-xs font-semibold text-indigo-200 uppercase tracking-wider">AI & Telegram Bot</span>
+                    <span class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">AI Control Center</span>
                 </div>
-                <p class="text-xs text-slate-300">Laravel REST API & n8n engine aktif & siap pakai.</p>
+                <p class="text-xs text-slate-300">N8n Engine & Laravel API siap melayani bot.</p>
             </div>
         </aside>
 
@@ -140,8 +170,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <!-- Quick Add Button -->
-                    <a href="{{ route('transactions.index', ['action' => 'create']) }}" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 transition-all">
+                    <a href="{{ route('transactions.index', ['action' => 'create']) }}" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-all">
                         <i class="fa-solid fa-plus"></i>
                         <span>Catat Transaksi</span>
                     </a>
