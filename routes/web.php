@@ -33,6 +33,6 @@ Route::resource('reminders', \App\Http\Controllers\ReminderController::class);
 Route::resource('bills', \App\Http\Controllers\RecurringBillController::class);
 Route::resource('budgets', \App\Http\Controllers\BudgetController::class);
 Route::resource('saving-goals', \App\Http\Controllers\SavingGoalController::class);
-Route::resource('ai-insights', \App\Http\Controllers\AiInsightController::class);
+Route::get('/ai-center', [\App\Http\Controllers\AiCenterController::class, 'index'])->name('ai-center.index');
 Route::resource('notifications', \App\Http\Controllers\NotificationController::class);
 Route::get('/telegram', [\App\Http\Controllers\TelegramConfigController::class, 'index'])->name('telegram.config');

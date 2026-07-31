@@ -1,47 +1,88 @@
-<x-app-layout title="Telegram Config - Control Center">
-    <x-slot name="header">Telegram / AI Setup</x-slot>
+<x-app-layout title="Telegram Center - FinTrack AI OS">
+    <x-slot name="header">Telegram System Center</x-slot>
+    <x-slot name="breadcrumb">Home / Dashboards / Telegram Center</x-slot>
+
     <div class="space-y-6 text-slate-800 font-sans">
-        <div class="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 text-center">
-            <div class="inline-flex w-24 h-24 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 rounded-3xl shadow-inner items-center justify-center mb-6">
-                <i class="fa-brands fa-telegram text-5xl"></i>
-            </div>
-            <h2 class="font-bold text-3xl text-slate-800 mb-3 tracking-tight">Telegram Bot Terhubung!</h2>
-            <p class="text-slate-500 max-w-lg mx-auto text-sm leading-relaxed mb-10">
-                Data akan selalu disinkronisasi melalui webhook N8n setiap kali ada input pesan chat melalui telegram assistant secara real-time.
-            </p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-4">
-                <div class="bg-slate-50/50 rounded-2xl p-5 text-center border border-slate-100">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-widest">Bot Status</p>
-                    <p class="font-bold text-emerald-600 flex items-center justify-center gap-1.5"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> ONLINE</p>
-                </div>
-                <div class="bg-slate-50/50 rounded-2xl p-5 text-center border border-slate-100">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-widest">Last Sync</p>
-                    <p class="font-bold text-slate-700">Baru Saja</p>
-                </div>
-                <div class="bg-slate-50/50 rounded-2xl p-5 text-center border border-slate-100">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-widest">Webhook Status</p>
-                    <p class="font-bold text-indigo-600">Active</p>
-                </div>
-                <div class="bg-slate-50/50 rounded-2xl p-5 text-center border border-slate-100">
-                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-widest">Workflow Engine</p>
-                    <p class="font-bold text-amber-500">Listening</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+             <div class="col-span-1 md:col-span-2 lg:col-span-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-lg flex items-center justify-between">
+                 <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-3"><i class="fa-brands fa-telegram"></i> Telegram Bot Link</h2>
+                    <p class="text-blue-100 mt-2 text-sm max-w-lg leading-relaxed">Interaksi NLP langsung dengan FinTrack AI. Seluruh pesan dikirim ke N8N Webhook dan direlasikan dengan Laravel Database untuk menyimpan data operasional Anda.</p>
+                 </div>
+                 <button class="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 shadow-sm transition hidden md:block">
+                     Test Connection
+                 </button>
+             </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Node Connectivity -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Webhook Status</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-bold text-slate-800">200 <span class="text-sm font-normal text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-lg">OK</span></h3>
                 </div>
             </div>
-            
-            <div class="mt-12 max-w-3xl mx-auto text-left bg-slate-900 border border-slate-800 text-slate-200 p-8 rounded-3xl shadow-xl">
-                <div class="flex items-center gap-3 mb-4 border-b border-slate-800 pb-4">
-                    <i class="fa-solid fa-terminal text-emerald-500"></i>
-                    <h4 class="font-bold text-sm text-slate-300 tracking-wide uppercase">Live Hook Snapshot Log</h4>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Latency avg</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-bold text-slate-800">42<span class="text-lg text-slate-400 font-medium ml-1">ms</span></h3>
                 </div>
-                <div class="font-mono text-[13px] text-emerald-400 bg-black/40 shadow-inner p-5 rounded-2xl overflow-x-auto leading-relaxed h-32">
-<pre>{
-  "event": "message_received",
-  "intent": "create_transaction", 
-  "amount": 25000, 
-  "category": "Makanan", 
-  "description": "Bakso"
-}</pre>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Error Rate</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-bold text-slate-800">0.0<span class="text-lg text-slate-400 font-medium ml-1">%</span></h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Queue / Retry</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-bold text-slate-800">0 <span class="text-lg text-slate-400 font-medium ml-1">/ 3</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Automation & Scheduler Status -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-700 mb-6 flex items-center gap-2"><i class="fa-solid fa-code-branch text-slate-400"></i> N8N Main Workflows</h3>
+                <div class="space-y-4 text-sm font-medium">
+                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                        <div class="flex gap-3 items-center">
+                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                            <span class="text-slate-700">Telegram NLP Parser Route</span>
+                        </div>
+                        <span class="text-emerald-500">Running</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                        <div class="flex gap-3 items-center">
+                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                            <span class="text-slate-700">Daily Report Broadcast (Cron)</span>
+                        </div>
+                        <span class="text-emerald-500">Idle / Next: 19:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Metrics -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-700 mb-6 flex items-center gap-2"><i class="fa-solid fa-message text-slate-400"></i> Telegram Chat Interactions</h3>
+                <div class="flex gap-6 mb-6">
+                    <div>
+                        <p class="text-xs text-slate-400 mb-1">Last Sync</p>
+                        <p class="font-bold text-slate-800">Just now</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 mb-1">Daily Requests</p>
+                        <p class="font-bold text-slate-800">42 msgs</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <p class="text-xs text-slate-400 mb-2">Terakhir Diterima:</p>
+                    <p class="text-sm text-slate-700 italic font-medium">"Tolong catat pengeluaran makan malam di KFC hari ini sebesar 55 ribu ya"</p>
+                    <p class="text-[10px] text-emerald-500 font-bold mt-3 uppercase">Parser Output: CreateTransactionIntent</p>
                 </div>
             </div>
         </div>

@@ -89,52 +89,52 @@
 
                 <a href="{{ route('transactions.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('transactions.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-wallet text-base w-5 text-center"></i>
-                    <span>Transaksi</span>
+                    <span>Transactions</span>
                 </a>
-                
-                <a href="{{ route('reminders.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('reminders.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-solid fa-bell text-base w-5 text-center"></i>
-                    <span>Reminders</span>
-                </a>
-                
-                <a href="{{ route('bills.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('bills.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
-                    <span>Recurring Bills</span>
+
+                <a href="{{ route('reports.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('reports.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-chart-column text-base w-5 text-center"></i>
+                    <span>Reports</span>
                 </a>
                 
                 <a href="{{ route('budgets.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('budgets.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-chart-line text-base w-5 text-center"></i>
-                    <span>Budgeting</span>
+                    <span>Budgets</span>
                 </a>
-                
+
                 <a href="{{ route('saving-goals.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('saving-goals.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-bullseye text-base w-5 text-center"></i>
                     <span>Saving Goals</span>
                 </a>
-                
-                <a href="{{ route('ai-insights.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('ai-insights.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-solid fa-brain text-base w-5 text-center"></i>
-                    <span>AI Insights</span>
+
+                <a href="{{ route('bills.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('bills.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-file-invoice-dollar text-base w-5 text-center"></i>
+                    <span>Bills</span>
                 </a>
-                
+
+                <a href="{{ route('reminders.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('reminders.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-bell text-base w-5 text-center"></i>
+                    <span>Reminders</span>
+                </a>
+
                 <a href="{{ route('notifications.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('notifications.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-envelope text-base w-5 text-center"></i>
                     <span>Notifications</span>
                 </a>
-                
-                <a href="{{ route('telegram.config') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('telegram.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-brands fa-telegram text-base w-5 text-center"></i>
-                    <span>Telegram Config</span>
+
+                <a href="{{ route('ai-center.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('ai-center.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-brain text-base w-5 text-center"></i>
+                    <span>AI Center</span>
                 </a>
 
-                <a href="{{ route('categories.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('categories.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                    <i class="fa-solid fa-layer-group text-base w-5 text-center"></i>
-                    <span>Kategori</span>
+                <a href="{{ route('telegram.config') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('telegram.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
+                    <i class="fa-brands fa-telegram text-base w-5 text-center"></i>
+                    <span>Telegram Center</span>
                 </a>
 
                 <a href="{{ route('settings.index') }}" class="flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-150 {{ request()->routeIs('settings.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
                     <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
-                    <span>Pengaturan</span>
+                    <span>Settings</span>
                 </a>
             </nav>
 
