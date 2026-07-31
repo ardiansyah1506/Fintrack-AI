@@ -38,11 +38,24 @@ Route::name('api.')->group(function () {
 
     // Control Center API Endpoints
     Route::apiResource('reminders', \App\Http\Controllers\Api\ReminderController::class);
-    Route::get('/bills', [\App\Http\Controllers\Api\RecurringBillController::class, 'index']);
+    Route::apiResource('bills', \App\Http\Controllers\Api\RecurringBillController::class);
+    Route::apiResource('budgets', \App\Http\Controllers\Api\BudgetController::class);
     Route::get('/budget/summary', [\App\Http\Controllers\Api\BudgetController::class, 'summary']);
-    Route::get('/saving-goals', [\App\Http\Controllers\Api\SavingGoalController::class, 'index']);
+    Route::apiResource('saving-goals', \App\Http\Controllers\Api\SavingGoalController::class);
+    Route::apiResource('notifications', \App\Http\Controllers\Api\NotificationController::class);
+    
+    // AI API Endpoints
+    Route::apiResource('insights', \App\Http\Controllers\Api\AiInsightController::class);
+    Route::apiResource('predictions', \App\Http\Controllers\Api\AiPredictionController::class);
+    Route::apiResource('recommendations', \App\Http\Controllers\Api\AiRecommendationController::class);
+    Route::apiResource('warnings', \App\Http\Controllers\Api\AiWarningController::class);
+    Route::apiResource('achievements', \App\Http\Controllers\Api\AiAchievementController::class);
+    Route::apiResource('memories', \App\Http\Controllers\Api\AiMemoryController::class);
+    Route::apiResource('chat-history', \App\Http\Controllers\Api\ChatHistoryController::class);
+    Route::apiResource('prompts', \App\Http\Controllers\Api\PromptController::class);
+    Route::apiResource('ai-logs', \App\Http\Controllers\Api\AiLogController::class);
+
+    // Dashboard & System
     Route::get('/dashboard/ai', [\App\Http\Controllers\Api\DashboardController::class, 'aiSummary']);
-    Route::get('/insights', [\App\Http\Controllers\Api\AiInsightController::class, 'index']);
-    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
     Route::get('/telegram/status', [\App\Http\Controllers\Api\TelegramStatusController::class, 'index']);
 });
