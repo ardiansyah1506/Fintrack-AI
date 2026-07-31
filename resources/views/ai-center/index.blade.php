@@ -40,7 +40,7 @@
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-full">
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-chart-line text-emerald-500"></i> AI Predictions</h3>
-                    <button class="text-xs font-bold text-slate-400 hover:text-emerald-500">View All</button>
+                    <a href="{{ route('predictions.index') }}" class="text-xs font-bold text-slate-400 hover:text-emerald-500">View All</a>
                 </div>
                 <div class="space-y-4">
                     <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50 flex items-start gap-4">
@@ -68,7 +68,7 @@
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-full">
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-database text-indigo-500"></i> AI Memory Scope</h3>
-                    <button class="text-xs font-bold text-slate-400 hover:text-indigo-500">Manage</button>
+                    <a href="{{ route('memories.index') }}" class="text-xs font-bold text-slate-400 hover:text-indigo-500">Manage</a>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <span class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">Kategori: Makan Harian</span>
@@ -86,10 +86,13 @@
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl lg:col-span-2 overflow-hidden text-emerald-400 font-mono text-sm relative">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-slate-300 font-sans tracking-wide">Live Transaction Logs (Intent)</h3>
-                    <span class="flex h-2.5 w-2.5 relative">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('ai-logs.index') }}" class="text-xs font-bold text-emerald-500/70 hover:text-emerald-400">View All</a>
+                        <span class="flex h-2.5 w-2.5 relative">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                    </div>
                 </div>
                 <div class="space-y-2 opacity-80 h-[200px] overflow-y-auto custom-scrollbar">
                     <p>[2026-07-31 16:40:22] <span class="text-slate-400">INFO     :</span> POST /api/bot/execute - Processing intent 'create_transaction'...</p>
@@ -103,7 +106,10 @@
 
             <!-- Prompt Manager Quick Access -->
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><i class="fa-solid fa-code text-slate-400"></i> Active Prompts</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-code text-slate-400"></i> Active Prompts</h3>
+                    <a href="{{ route('prompts.index') }}" class="text-xs font-bold text-slate-400 hover:text-emerald-500">Manage</a>
+                </div>
                 <div class="space-y-3">
                     <div class="flex justify-between items-center p-3 border border-slate-100 rounded-xl bg-slate-50">
                         <div>
@@ -128,6 +134,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <!-- More Modules -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+            <a href="{{ route('recommendations.index') }}" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center font-bold text-slate-700 hover:text-emerald-600 hover:border-emerald-200 transition">Recommendations</a>
+            <a href="{{ route('warnings.index') }}" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center font-bold text-slate-700 hover:text-emerald-600 hover:border-emerald-200 transition">Warnings</a>
+            <a href="{{ route('achievements.index') }}" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center font-bold text-slate-700 hover:text-emerald-600 hover:border-emerald-200 transition">Achievements</a>
+            <a href="{{ route('chat-histories.index') }}" class="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center font-bold text-slate-700 hover:text-emerald-600 hover:border-emerald-200 transition">Chat Histories</a>
         </div>
     </div>
 </x-app-layout>

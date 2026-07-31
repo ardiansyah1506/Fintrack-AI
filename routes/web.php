@@ -36,3 +36,14 @@ Route::resource('saving-goals', \App\Http\Controllers\SavingGoalController::clas
 Route::get('/ai-center', [\App\Http\Controllers\AiCenterController::class, 'index'])->name('ai-center.index');
 Route::resource('notifications', \App\Http\Controllers\NotificationController::class);
 Route::get('/telegram', [\App\Http\Controllers\TelegramConfigController::class, 'index'])->name('telegram.config');
+
+// AI Sub Modules
+Route::resource("prompts", \App\Http\Controllers\PromptController::class);
+Route::resource("memories", \App\Http\Controllers\AiMemoryController::class);
+Route::resource("ai-logs", \App\Http\Controllers\AiLogController::class);
+Route::resource("chat-histories", \App\Http\Controllers\ChatHistoryController::class);
+Route::resource("predictions", \App\Http\Controllers\AiPredictionController::class);
+Route::resource("recommendations", \App\Http\Controllers\AiRecommendationController::class);
+Route::resource("warnings", \App\Http\Controllers\AiWarningController::class);
+Route::resource("achievements", \App\Http\Controllers\AiAchievementController::class);
+
