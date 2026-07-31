@@ -16,6 +16,9 @@ class Transaction extends Model
         'amount',
         'description',
         'notes',
+        'source',
+        'created_by',
+        'attachment_url',
     ];
 
     protected $casts = [
