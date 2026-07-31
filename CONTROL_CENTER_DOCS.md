@@ -233,3 +233,12 @@ Satu-satunya endpoint webhook terpadu untuk mengeksekusi segala jenis intent *Na
 2. **Dashboard Overview** (`GET /` & API `GET /api/dashboard`).
 3. **Kategori Master** (`GET /categories`).
 4. **Laporan Keuangan** (`GET /reports`).
+
+## 5. Web Interface CRUD Integration
+Seluruh entitas operasi AI (seperti Tagihan Rutin, Target Tabungan, Pagu Anggaran, dan Pengingat) kini memiliki Web Interface *Create, Read, Update, Delete* penuh di Control Center Dashboard.
+
+Secara teknis:
+- **UI Responsif**: Diimplementasi menggunakan kombinasi Blade Components, Tailwind CSS, dan Alpine.js Modal (x-show).
+- **Synchronized Data**: Data yang ditambah/diupdate melalui form di website akan secara instan mengubah *knowledge scope* dan *trigger-rules* yang akan dibaca oleh N8n melalui REST API.
+- **Controller Terpadu**: Di-handle pada level App\Http\Controllers\BudgetController, RecurringBillController, SavingGoalController, dan ReminderController.
+
