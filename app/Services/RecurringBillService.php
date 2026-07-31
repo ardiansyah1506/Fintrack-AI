@@ -13,8 +13,8 @@ class RecurringBillService
         $this->repository = $repository;
     }
 
-    public function getAll() {
-        return $this->repository->all();
+    public function getAll(array $filters = [], int $perPage = 10) {
+        return $this->repository->getPaginated($filters, $perPage);
     }
 
     public function create(array $data) {

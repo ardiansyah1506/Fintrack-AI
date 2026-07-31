@@ -11,6 +11,15 @@
                 <i class="fa-solid fa-plus mr-2"></i> Tambah Anggaran
             </button>
         </div>
+        
+        <form method='GET' action='{{ request()->url() }}' class='flex gap-2 w-full max-w-sm mt-4 md:mt-0'>
+            <input type='text' name='search' value='{{ request()->search }}' placeholder='Cari data...' class='w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50'>
+            <button type='submit' class='bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition'><i class='fa-solid fa-search'></i></button>
+            @if(request()->search)
+                <a href='{{ request()->url() }}' class='bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition'><i class='fa-solid fa-xmark'></i></a>
+            @endif
+        </form>
+        
 
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <table class="w-full text-left text-sm whitespace-nowrap">
@@ -47,6 +56,10 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class='mt-4'>
+            {{ $budgets->appends(['search' => request('search')])->links() }}
         </div>
 
         <!-- Alpine Modal -->

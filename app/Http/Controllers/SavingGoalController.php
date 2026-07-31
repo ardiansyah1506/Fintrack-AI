@@ -1,38 +1,33 @@
 <?php
 namespace App\Http\Controllers;
-
-use App\Models\SavingGoal;
 use Illuminate\Http\Request;
+use App\Http\Requests\SavingGoalRequest;
+use App\Services\SavingGoalService;
 
 class SavingGoalController extends Controller
 {
     protected $service;
-    public function __construct(\App\Services\SavingGoalService $service) {
-        $this->service = $service;
-    }
+    public function __construct(SavingGoalService $service) { $this->service = $service; }
 
-    public function index()
-    {
+    public function index(Request $request) {
+        $filters = $request->only('search');
         return view('saving-goals.index', [
-            'goals' => $this->service->getAll()
+            'saving_goals' => $this->service->getAll($filters, 10)
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $this->service->create($request->all());
-        return back()->with('success', 'Saving Goal berhasil ditambahkan.');
+    public function store(SavingGoalRequest $request) {
+        $this->service->create($request->validated());
+        return back()->with('success', 'Data berhasil ditambahkan.');
     }
 
-    public function update(Request $request, $id)
-    {
-        $this->service->update($id, $request->all());
-        return back()->with('success', 'Saving Goal berhasil diupdate.');
+    public function update(SavingGoalRequest $request, $id) {
+        $this->service->update($id, $request->validated());
+        return back()->with('success', 'Data berhasil diupdate.');
     }
 
-    public function destroy($id)
-    {
+    public function destroy($id) {
         $this->service->delete($id);
-        return back()->with('success', 'Saving Goal berhasil dihapus.');
+        return back()->with('success', 'Data berhasil dihapus.');
     }
 }

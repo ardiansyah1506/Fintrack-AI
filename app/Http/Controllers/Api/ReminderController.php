@@ -1,40 +1,37 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-// We skip specific Request/Resource for brevity since they are internal API calls, 
-// or use normal request validate if FormRequests are unverified.
+use App\Http\Requests\ReminderRequest;
 use App\Services\ReminderService;
+use App\Http\Resources\ReminderResource;
 
 class ReminderController extends Controller
 {
     protected $service;
+    public function __construct(ReminderService $service) { $this->service = $service; }
 
-    public function __construct(ReminderService $service)
-    {
-        $this->service = $service;
+    public function index(Request $request) {
+        $filters = $request->only('search');
+        return ReminderResource::collection($this->service->getAll($filters, 10));
     }
 
-    public function index()
-    {
-        return response()->json(['data' => $this->service->getAllReminders()]);
+    public function store(ReminderRequest $request) {
+        $data = $this->service->create($request->validated());
+        return new ReminderResource($data);
     }
 
-    public function store(Request $request)
-    {
-        return response()->json(['data' => $this->service->createReminder($request->all())]);
+    public function show($id) {
+        return new ReminderResource($this->service->repository->find($id));
     }
 
-    public function update(Request $request, string $id)
-    {
-        return response()->json(['data' => $this->service->updateReminder($id, $request->all())]);
+    public function update(ReminderRequest $request, $id) {
+        $data = $this->service->update($id, $request->validated());
+        return new ReminderResource($data);
     }
 
-    public function destroy(string $id)
-    {
-        $this->service->deleteReminder($id);
-        return response()->json(['message' => 'deleted']);
+    public function destroy($id) {
+        $this->service->delete($id);
+        return response()->json(['message' => 'Deleted completely']);
     }
 }

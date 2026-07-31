@@ -1,42 +1,33 @@
 <?php
 namespace App\Http\Controllers;
-
-use App\Models\RecurringBill;
 use Illuminate\Http\Request;
+use App\Http\Requests\RecurringBillRequest;
+use App\Services\RecurringBillService;
 
 class RecurringBillController extends Controller
 {
     protected $service;
-    public function __construct(\App\Services\RecurringBillService $service) {
-        $this->service = $service;
-    }
+    public function __construct(RecurringBillService $service) { $this->service = $service; }
 
-    public function index()
-    {
+    public function index(Request $request) {
+        $filters = $request->only('search');
         return view('bills.index', [
-            'bills' => $this->service->getAll()
+            'bills' => $this->service->getAll($filters, 10)
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->all();
-        $data['auto_create_transaction'] = $request->has('auto_create_transaction');
-        $this->service->create($data);
-        return back()->with('success', 'Tagihan rutin berhasil ditambahkan.');
+    public function store(RecurringBillRequest $request) {
+        $this->service->create($request->validated());
+        return back()->with('success', 'Data berhasil ditambahkan.');
     }
 
-    public function update(Request $request, $id)
-    {
-        $data = $request->all();
-        $data['auto_create_transaction'] = $request->has('auto_create_transaction');
-        $this->service->update($id, $data);
-        return back()->with('success', 'Tagihan rutin berhasil diupdate.');
+    public function update(RecurringBillRequest $request, $id) {
+        $this->service->update($id, $request->validated());
+        return back()->with('success', 'Data berhasil diupdate.');
     }
 
-    public function destroy($id)
-    {
+    public function destroy($id) {
         $this->service->delete($id);
-        return back()->with('success', 'Tagihan rutin berhasil dihapus.');
+        return back()->with('success', 'Data berhasil dihapus.');
     }
 }

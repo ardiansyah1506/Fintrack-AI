@@ -25,4 +25,19 @@ class ReminderRepository implements ReminderRepositoryInterface
     }
     public function delete($id) { return $this->find($id)->delete(); }
     public function query() { return $this->model->newQuery(); }
+
+    public function getPaginated(array $filters, int $perPage = 10) {
+        $query = $this->model->newQuery();
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function($q) use ($search) {
+                // Dynamic simple search on multiple text columns
+                foreach (\Illuminate\Support\Facades\Schema::getColumnListing($this->model->getTable()) as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+            });
+        }
+        return $query->orderBy('id', 'desc')->paginate($perPage);
+    }
+
 }

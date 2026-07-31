@@ -10,4 +10,5 @@ interface RecurringBillRepositoryInterface
     public function update($id, array $data);
     public function delete($id);
     public function query();
+    public function getPaginated(array $filters, int $perPage = 10);
 }
