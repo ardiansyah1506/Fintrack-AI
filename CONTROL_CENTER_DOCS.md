@@ -152,12 +152,12 @@ Semua pengolahan logic AI (pengingat jatuh tempo, generasi *insight*, parsing st
 }
 ```
 
-### G. Telegram Sync & Webhook N8N API Lama
-Di bawah ini adalah format payload integrasi Bot lama yang menjadi pusat N8n untuk mengeksekusi chat intent.
+### G. Telegram Sync & Webhook (N8N Unified API)
+Satu-satunya endpoint webhook terpadu untuk mengeksekusi segala jenis intent *Natural Language* dari chat Telegram yang telah di-_parse_ oleh AI n8n.
 * **API Endpoints**:
-  * `POST /api/bot/execute` (Webhook eksekusi dari Telegram via N8N parser model).
+  * `POST /api/bot/execute` (Webhook N8N intent-handler utama).
 
-**Contoh Parameter Payload JSON Request (POST):**
+**Contoh 1: Payload `create_transaction`**
 ```json
 {
   "intent": "create_transaction",
@@ -166,6 +166,48 @@ Di bawah ini adalah format payload integrasi Bot lama yang menjadi pusat N8n unt
   "description": "Nasi uduk depan kampus",
   "type": "expense",
   "date": "2026-07-31"
+}
+```
+
+**Contoh 2: Payload `create_reminder`**
+```json
+{
+  "intent": "create_reminder",
+  "title": "Bayar cicilan motor",
+  "due_date": "2026-08-01",
+  "due_time": "09:00",
+  "priority": "high",
+  "status": "pending"
+}
+```
+
+**Contoh 3: Payload `create_bill`**
+```json
+{
+  "intent": "create_bill",
+  "name": "Netflix Premium",
+  "category": "Hiburan",
+  "amount": 185000,
+  "repeat": "monthly"
+}
+```
+
+**Contoh 4: Payload `create_budget`**
+```json
+{
+  "intent": "create_budget",
+  "category": "Makanan",
+  "amount": 2000000
+}
+```
+
+**Contoh 5: Payload `create_saving_goal`**
+```json
+{
+  "intent": "create_saving_goal",
+  "title": "Liburan Jepang",
+  "target_amount": 20000000,
+  "deadline": "2027-12-31"
 }
 ```
 

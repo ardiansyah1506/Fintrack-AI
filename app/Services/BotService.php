@@ -4,6 +4,10 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use InvalidArgumentException;
+use App\Services\ReminderService;
+use App\Services\RecurringBillService;
+use App\Services\SavingGoalService;
+use App\Services\BudgetService;
 
 class BotService
 {
@@ -12,7 +16,11 @@ class BotService
         protected CategoryService $categoryService,
         protected ReportService $reportService,
         protected StatisticService $statisticService,
-        protected DashboardService $dashboardService
+        protected DashboardService $dashboardService,
+        protected ReminderService $reminderService,
+        protected RecurringBillService $recurringBillService,
+        protected SavingGoalService $savingGoalService,
+        protected BudgetService $budgetService
     ) {}
 
     /**
@@ -31,6 +39,10 @@ class BotService
             'weekly_report' => $this->handleWeeklyReport($parameters),
             'monthly_report' => $this->handleMonthlyReport($parameters),
             'budget', 'balance' => $this->handleBudget($parameters),
+            'create_reminder' => $this->handleCreateReminder($parameters),
+            'create_bill' => $this->handleCreateBill($parameters),
+            'create_budget' => $this->handleCreateBudget($parameters),
+            'create_saving_goal' => $this->handleCreateSavingGoal($parameters),
             'help' => $this->handleHelp(),
             default => throw new InvalidArgumentException("Intent '{$intent}' tidak dikenali. Gunakan intent 'help' untuk petunjuk."),
         };
@@ -166,6 +178,50 @@ class BotService
         ];
     }
 
+    protected function handleCreateReminder(array $params): array
+    {
+        $reminder = $this->reminderService->createReminder($params);
+        return [
+            'intent' => 'create_reminder',
+            'status' => 'success',
+            'message' => 'Pengingat berhasil dibuat',
+            'reminder' => $reminder,
+        ];
+    }
+
+    protected function handleCreateBill(array $params): array
+    {
+        $bill = $this->recurringBillService->createBill($params);
+        return [
+            'intent' => 'create_bill',
+            'status' => 'success',
+            'message' => 'Tagihan rutin berhasil dibuat',
+            'bill' => $bill,
+        ];
+    }
+    
+    protected function handleCreateBudget(array $params): array
+    {
+        $budget = $this->budgetService->createBudget($params);
+        return [
+            'intent' => 'create_budget',
+            'status' => 'success',
+            'message' => 'Budget berhasil dibuat',
+            'budget' => $budget,
+        ];
+    }
+
+    protected function handleCreateSavingGoal(array $params): array
+    {
+        $goal = $this->savingGoalService->createGoal($params);
+        return [
+            'intent' => 'create_saving_goal',
+            'status' => 'success',
+            'message' => 'Target tabungan berhasil dibuat',
+            'saving_goal' => $goal,
+        ];
+    }
+
     protected function handleHelp(): array
     {
         return [
@@ -179,6 +235,10 @@ class BotService
                 'weekly_report' => 'Mengambil laporan mingguan (params: start_date, end_date)',
                 'monthly_report' => 'Mengambil laporan bulanan (params: year, month)',
                 'budget' => 'Melihat ringkasan saldo & kas',
+                'create_reminder' => 'Membuat pengingat (params: title, due_date, due_time, priority)',
+                'create_bill' => 'Membuat tagihan rutin (params: name, category, amount, repeat)',
+                'create_budget' => 'Membuat batas anggaran bulanan (params: category, amount)',
+                'create_saving_goal' => 'Membuat target tabungan (params: title, target_amount, deadline)',
                 'help' => 'Menampilkan daftar intent bot',
             ],
         ];
