@@ -26,8 +26,8 @@
             </div>
         </div>
 
-        <!-- Summary Widgets (5 Cols) -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+        <!-- Summary Widgets (7 Cols) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 lg:gap-5">
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-wallet text-slate-300"></i> Current Balance</p>
                 <h3 class="text-2xl font-bold text-slate-800 mt-2">Rp 24.500.000</h3>
@@ -47,6 +47,14 @@
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-bell text-indigo-500"></i> Upcoming Task</p>
                 <h3 class="text-2xl font-bold text-indigo-500 mt-2">1 Reminder</h3>
+            </div>
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-brands fa-telegram text-blue-500"></i> N8N Sync</p>
+                <h3 class="text-2xl font-bold text-blue-500 mt-2">Active</h3>
+            </div>
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-code-branch text-purple-500"></i> Workflow</p>
+                <h3 class="text-2xl font-bold text-purple-500 mt-2">Running</h3>
             </div>
         </div>
 
@@ -97,34 +105,64 @@
         </div>
 
         <!-- AI Assistant Blocks -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Latest AI Insight -->
-            <div class="bg-gradient-to-br from-emerald-50 to-white rounded-3xl p-6 shadow-sm border border-emerald-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex justify-center items-center">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <div class="bg-gradient-to-br from-emerald-50 to-white rounded-3xl p-6 shadow-sm border border-emerald-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex justify-center items-center">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h4 class="font-bold text-emerald-900 leading-tight">AI<br>Insight</h4>
                     </div>
-                    <h4 class="font-bold text-emerald-900">Latest AI Insight</h4>
+                    <p class="text-sm text-slate-700 leading-relaxed font-medium">Anda berhasil menekan pengeluaran 'Makan di Luar' sebesar 30%. Sisa budget dapat dialokasikan ke 'Tabungan Liburan'.</p>
                 </div>
-                <p class="text-sm text-slate-700 leading-relaxed font-medium">Berdasarkan data minggu ini, Anda berhasil menekan pengeluaran 'Makan di Luar' sebesar 30%. Sisa budget dapat dialokasikan ke 'Tabungan Liburan'. Teruskan kebiasaan baik ini!</p>
                 <div class="mt-4 flex gap-2">
-                    <span class="px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-lg text-xs font-bold">Optimization</span>
-                    <span class="px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-lg text-xs font-bold">Generated 2h ago</span>
+                    <span class="px-2 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-lg text-[10px] font-bold">Optimization</span>
                 </div>
             </div>
 
             <!-- Prediction Card -->
-            <div class="bg-gradient-to-br from-indigo-50 to-white rounded-3xl p-6 shadow-sm border border-indigo-100">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex justify-center items-center">
-                        <i class="fa-solid fa-chart-line"></i>
+            <div class="bg-gradient-to-br from-indigo-50 to-white rounded-3xl p-6 shadow-sm border border-indigo-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex justify-center items-center">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h4 class="font-bold text-indigo-900 leading-tight">AI<br>Prediction</h4>
                     </div>
-                    <h4 class="font-bold text-indigo-900">AI Financial Prediction</h4>
+                    <p class="text-sm text-slate-700 leading-relaxed font-medium">Model regresi memprediksi saldo akhir bulan Anda mencapai surplus Rp 5.200.000.</p>
                 </div>
-                <p class="text-sm text-slate-700 leading-relaxed font-medium">Model regresi Gemini memprediksi bahwa saldo akhir bulan Anda akan mencapai surplus **Rp 5.200.000**, dengan tingkat akurasi (confidence level) 85%.</p>
                 <div class="mt-4 flex gap-2">
-                    <span class="px-3 py-1 bg-white border border-indigo-200 text-indigo-600 rounded-lg text-xs font-bold">Accuracy: 85%</span>
-                    <span class="px-3 py-1 bg-white border border-indigo-200 text-indigo-600 rounded-lg text-xs font-bold">Trend: Positive</span>
+                    <span class="px-2 py-1 bg-white border border-indigo-200 text-indigo-600 rounded-lg text-[10px] font-bold">Accuracy: 85%</span>
+                </div>
+            </div>
+
+            <!-- AI Recommendation -->
+            <div class="bg-gradient-to-br from-amber-50 to-white rounded-3xl p-6 shadow-sm border border-amber-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex justify-center items-center"><i class="fa-solid fa-lightbulb"></i></div>
+                        <h4 class="font-bold text-amber-900 leading-tight">AI<br>Recommendation</h4>
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed font-medium">Beralih ke model langganan tahunan untuk asuransi dan software dapat menghemat Rp 750.000 per tahun.</p>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <span class="px-2 py-1 bg-white border border-amber-200 text-amber-600 rounded-lg text-[10px] font-bold">Smart Saving</span>
+                </div>
+            </div>
+
+            <!-- AI Warning -->
+            <div class="bg-gradient-to-br from-rose-50 to-white rounded-3xl p-6 shadow-sm border border-rose-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex justify-center items-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <h4 class="font-bold text-rose-900 leading-tight">AI<br>Warning</h4>
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed font-medium">Pengeluaran kategori 'Hiburan' telah melebihi batas upper budget minggu ini sebesar 12%. Harap rem pengeluaran diskresi.</p>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <span class="px-2 py-1 bg-white border border-rose-200 text-rose-600 rounded-lg text-[10px] font-bold">High Severity</span>
                 </div>
             </div>
         </div>

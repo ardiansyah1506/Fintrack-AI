@@ -27,12 +27,16 @@ class DashboardController extends Controller
         );
     }
 
+    /**
+     * GET /api/dashboard/ai
+     */
     public function aiSummary()
     {
-        return $this->successResponse([
-            'balance' => 0,
-            'reminders_count' => \App\Models\Reminder::where('status', 'pending')->count(),
-            'bills_count' => \App\Models\RecurringBill::where('status', 'active')->count()
-        ], 'Data AI Summary Berhasil');
+        $data = $this->dashboardService->getAiSummary();
+
+        return $this->successResponse(
+            $data,
+            'Data AI Summary Berhasil'
+        );
     }
 }

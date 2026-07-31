@@ -26,6 +26,10 @@ class RecurringBillRepository implements RecurringBillRepositoryInterface
     public function delete($id) { return $this->find($id)->delete(); }
     public function query() { return $this->model->newQuery(); }
 
+    public function countByStatus(string $status): int {
+        return $this->model->where('status', $status)->count();
+    }
+
     public function getPaginated(array $filters, int $perPage = 10) {
         $query = $this->model->newQuery();
         if (!empty($filters['search'])) {

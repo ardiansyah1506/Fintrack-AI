@@ -271,40 +271,88 @@ Secara teknis:
 Keseluruhan **8 Modul AI Center** terbaru telah dipetakan menjadi endpoints mandiri, terikat dengan `FormRequest` validation dan `REST API Resources`. Parameter input sifatnya statis berdasarkan nama tabel. N8N dapat me-record JSON secara leluasa.
 
 ### Endpoints REST API Utama (AI Center)
+
 Semua route mendukung skema: `GET` (List all search & paginate), `POST` (Create/Inject data dari bot), `GET /{id}` (Detail), `PUT /{id}` (Update Data), `DELETE /{id}`.
 
 1. **AI Insights**
-   - **Route:** `/api/ai-insights`
-   - **Asumsi Parameter POST:** json `{ "title": "Insight keuangan 1", "content": "Rasio tabungan 30%" }`
-   
+    - **Route:** `/api/ai-insights`
+    - **Asumsi Parameter POST:** json `{ "title": "Insight keuangan 1", "content": "Rasio tabungan 30%" }`
 2. **AI Predictions**
-   - **Route:** `/api/predictions`
-   - **Asumsi Parameter POST:** json `{ "type": "cashflow", "prediction_value": "Minus 200k lusa", "confidence_score": 85 }`
+    - **Route:** `/api/predictions`
+    - **Asumsi Parameter POST:** json `{ "type": "cashflow", "prediction_value": "Minus 200k lusa", "confidence_score": 85 }`
 
 3. **AI Recommendations**
-   - **Route:** `/api/recommendations`
-   - **Asumsi Parameter POST:** json `{ "context": "Budget makanan", "advice": "Kurangi gofood" }`
+    - **Route:** `/api/recommendations`
+    - **Asumsi Parameter POST:** json `{ "context": "Budget makanan", "advice": "Kurangi gofood" }`
 
 4. **AI Warnings**
-   - **Route:** `/api/warnings`
-   - **Asumsi Parameter POST:** json `{ "severity": "high", "message": "Resiko gagal bayar asuransi bulan ini" }`
+    - **Route:** `/api/warnings`
+    - **Asumsi Parameter POST:** json `{ "severity": "high", "message": "Resiko gagal bayar asuransi bulan ini" }`
 
 5. **AI Achievements**
-   - **Route:** `/api/achievements`
-   - **Asumsi Parameter POST:** json `{ "badge": "Gold Saver", "description": "Tercapai simpanan 10 Juta!" }`
+    - **Route:** `/api/achievements`
+    - **Asumsi Parameter POST:** json `{ "badge": "Gold Saver", "description": "Tercapai simpanan 10 Juta!" }`
 
 6. **AI Memories (Context Vector Database)**
-   - **Route:** `/api/memories`
-   - **Asumsi Parameter POST:** json `{ "key": "favorite_food", "value": "Suka nasi padang", "relevance": 9 }`
+    - **Route:** `/api/memories`
+    - **Asumsi Parameter POST:** json `{ "key": "favorite_food", "value": "Suka nasi padang", "relevance": 9 }`
 
 7. **Prompt Manager**
-   - **Route:** `/api/prompts`
-   - **Asumsi Parameter POST:** json `{ "ai_role": "analyst", "instruction_template": "Berikan rekomendasi keuangan..." }`
+    - **Route:** `/api/prompts`
+    - **Asumsi Parameter POST:** json `{ "ai_role": "analyst", "instruction_template": "Berikan rekomendasi keuangan..." }`
 
 8. **AI Logs (Tracking request duration)**
-   - **Route:** `/api/ai-logs`
-   - **Asumsi Parameter POST:** json `{ "endpoint": "n8n/gemini", "duration_ms": 1500, "status": "success" }`
+    - **Route:** `/api/ai-logs`
+    - **Asumsi Parameter POST:** json `{ "endpoint": "n8n/gemini", "duration_ms": 1500, "status": "success" }`
 
 > **Note Validasi:** Jika n8n mem-posting data yang salah atau kurang argumen `required`, server secara otomatis mem-bounce request dengan JSON tipe HTTP 422: `{"message": "The given data was invalid", "errors": {"title": ["The title field is required."]}}`.
 
 ## ✅ Status Sistem Refactor: STABIL (100% Backward & Forward Ready)
+
+---
+
+## 🏛️ 7. Standar Arsitektur (Master Architecture Guide)
+
+Proyek ini telah ditetapkan sebagai **AI Personal Finance Operating System** dengan arsitektur ketat yang mengadopsi prinsip **SOLID** dan **Clean Architecture**.
+
+### A. Peran Komponen Utama
+
+1. **Laravel**: Berperan mutlak sebagai _Control Center_, Penyedia REST API, _Single Source of Truth_ database, dan mengeksekusi _Business Logic_ beserta fungsi _CRUD Web UI_. **Bukan chatbot** dan **tidak melakukan NLP Parsing**.
+2. **n8n**: Bertindak sebagai _Workflow Automation Engine_ dan satu-satunya _Scheduler/Cronrunner_. Seluruh penjadwalan (Reminder, Bills) diatur dari n8n.
+3. **Gemini**: Memainkan peran sebagai _AI Brain_ yang membaca _prompt_ serta menganalisis NLP (sistem intent).
+4. **Telegram**: Bertindak hanya sebagai antarmuka (_Natural Language Interface_).
+
+### B. Hierarki Clean Architecture Workflow
+
+Alur kerja yang wajib ditaati untuk seluruh integrasi bot & Web:
+`Controller → Service → (Intent Dispatcher) → (Intent Class) → Repository → Database`
+
+- **Controller**: Tidak boleh mempunyai business logic, fungsi _Controller_ hanya meneruskan _Request/JSON_ ke _Service_.
+- **Intent Dispatcher**: Menggantikan _Switch-Case_. Memetakan _intent string_ ke _Intent Class_ melalui parameter injeksi (_Dependency Injection_ - `app()->make()`).
+- **Intent Class**: Merupakan _single responsibility class_ yang fokus me-_return_ command JSON tertentu namun **tidak boleh** melakukan _query_ database. Panggil _Service_!
+- **Service Layer**: Mengolah logika bisnis dan memanggil metode pada _Repository_. Komponen ini digunakan bersamaan secara sinkron oleh API Web maupun Telegram.
+- **Repository**: Ujung tombak komunikasi Eloquent. Jangan gunakan query mentah `User::where(...)` di Controller atau Service. _Bind_ melalui interface klasikal (Dependency Injection `TransactionRepositoryInterface`).
+
+### C. Standardisasi REST API
+
+Seluruh format pengiriman output harus menggunakan standar absolut:
+
+```json
+// Berhasil
+{
+    "success": true,
+    "message": "Success",
+    "data": { ... }
+}
+
+// Gagal Validasi HTTP 422
+{
+    "success": false,
+    "message": "Validation Error",
+    "errors": { ... }
+}
+```
+
+Untuk mengimplementasikannya, Backend telah difilter melewati layer `FormRequest` untuk validasi otomatis dan dikembalikan melalui `API Resource`. Penulisan script secara ketat telah menggunakan fitur terbarukan _Laravel 12_ seperti _Type Hint_, _PHPDoc_, dan eksplisit _Return Type_.
+
+Seluruh _backward compatibility_ dari fitur dasar transaksi dan laporan dijamin tetap 100% fungsional baik pada interface web Blade (/reports, /categories) maupun API.

@@ -16,8 +16,14 @@ class IntentDispatcherService
         'update_transaction' => \App\Intents\Transactions\UpdateTransactionIntent::class,
         'delete_transaction' => \App\Intents\Transactions\DeleteTransactionIntent::class,
         
+        // Category Module
+        'create_category' => \App\Intents\Categories\CreateCategoryIntent::class,
+        'update_category' => \App\Intents\Categories\UpdateCategoryIntent::class,
+        'delete_category' => \App\Intents\Categories\DeleteCategoryIntent::class,
+
         // Statistics & Reports Module
         'statistics' => \App\Intents\Statistics\StatisticsIntent::class,
+        'report' => \App\Intents\Statistics\ReportIntent::class,
         'daily_report' => \App\Intents\Statistics\ReportIntent::class,
         'weekly_report' => \App\Intents\Statistics\ReportIntent::class,
         'monthly_report' => \App\Intents\Statistics\ReportIntent::class,
@@ -66,8 +72,11 @@ class IntentDispatcherService
         'list_prompts' => \App\Intents\Prompts\ListPromptsIntent::class,
         
         // System Module
+        'greeting' => \App\Intents\System\GreetingIntent::class,
         'telegram_status' => \App\Intents\System\TelegramStatusIntent::class,
+        'dashboard' => \App\Intents\System\DashboardSummaryIntent::class,
         'dashboard_summary' => \App\Intents\System\DashboardSummaryIntent::class,
+        'unknown' => \App\Intents\System\UnknownIntent::class,
         
         // Tools 
         'help' => \App\Intents\System\HelpIntent::class,

@@ -2,14 +2,18 @@
 
 namespace App\Services;
 
-use App\Models\Transaction;
+use App\Contracts\Repositories\RecurringBillRepositoryInterface;
+use App\Contracts\Repositories\ReminderRepositoryInterface;
+use App\Contracts\Repositories\TransactionRepositoryInterface;
 use Carbon\Carbon;
 
 class DashboardService
 {
     public function __construct(
         protected StatisticService $statisticService,
-        protected \App\Contracts\Repositories\TransactionRepositoryInterface $transactionRepository
+        protected TransactionRepositoryInterface $transactionRepository,
+        protected ReminderRepositoryInterface $reminderRepository,
+        protected RecurringBillRepositoryInterface $recurringBillRepository
     ) {}
 
     /**
@@ -19,12 +23,11 @@ class DashboardService
     {
         $now = Carbon::now();
 
-        $totalIncome = (float) $this->transactionRepository->query()->where('type', 'income')->sum('amount');
-        $totalExpense = (float) $this->transactionRepository->query()->where('type', 'expense')->sum('amount');
+        $totalIncome = (float) $this->transactionRepository->sumByTypeAndMonth('income', $now->year, $now->month);
+        $totalExpense = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $now->year, $now->month);
         $currentBalance = $totalIncome - $totalExpense;
 
         $monthlyIncome = (float) $this->transactionRepository->sumByTypeAndMonth('income', $now->year, $now->month);
-
         $monthlyExpense = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $now->year, $now->month);
 
         $monthlyBalance = $monthlyIncome - $monthlyExpense;
@@ -38,6 +41,20 @@ class DashboardService
             'monthly_expense' => $monthlyExpense,
             'monthly_balance' => $monthlyBalance,
             'total_transactions' => $totalTransactionsCount,
+        ];
+    }
+
+    /**
+     * Get AI Summary metrics using Repositories (Clean Architecture).
+     */
+    public function getAiSummary(): array
+    {
+        $summaryMetrics = $this->getSummaryMetrics();
+
+        return [
+            'balance' => $summaryMetrics['current_balance'],
+            'reminders_count' => $this->reminderRepository->countByStatus('pending'),
+            'bills_count' => $this->recurringBillRepository->countByStatus('active')
         ];
     }
 

@@ -46,12 +46,14 @@ Route::name('api.')->group(function () {
     
     // AI API Endpoints
     Route::apiResource('insights', \App\Http\Controllers\Api\AiInsightController::class);
+    Route::apiResource('ai-insights', \App\Http\Controllers\Api\AiInsightController::class);
     Route::apiResource('predictions', \App\Http\Controllers\Api\AiPredictionController::class);
     Route::apiResource('recommendations', \App\Http\Controllers\Api\AiRecommendationController::class);
     Route::apiResource('warnings', \App\Http\Controllers\Api\AiWarningController::class);
     Route::apiResource('achievements', \App\Http\Controllers\Api\AiAchievementController::class);
     Route::apiResource('memories', \App\Http\Controllers\Api\AiMemoryController::class);
     Route::apiResource('chat-history', \App\Http\Controllers\Api\ChatHistoryController::class);
+    Route::apiResource('chat-histories', \App\Http\Controllers\Api\ChatHistoryController::class);
     Route::apiResource('prompts', \App\Http\Controllers\Api\PromptController::class);
     Route::apiResource('ai-logs', \App\Http\Controllers\Api\AiLogController::class);
 
