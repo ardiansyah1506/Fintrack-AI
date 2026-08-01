@@ -151,6 +151,7 @@ Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent
 | **Category** | `create_category` | `name`, `type` (income/expense) |
 | | `update_category` | `id`, `name`, `type` |
 | | `delete_category` | `id` |
+| | `list_categories` / `categories` | `type` (optional: income/expense. Jika kosong, mengembalikan seluruh kategori) |
 | **Statistics** | `statistics` | `period` (today/this_week/this_month) |
 | | `report` / `daily_report` | `date` (YYYY-MM-DD) |
 | | `weekly_report` | `start_date`, `end_date` |
@@ -234,7 +235,7 @@ Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent
 ## 7. Modul Keuangan Core (CRUD)
 
 ### A. Categories
-- `GET /api/categories` : List seluruh kategori (Mendukung `?search=`).
+- `GET /api/categories` : List kategori (Mendukung `?search=` dan `?type=income|expense`. **Jika `?type=` kosong/tidak diisi, sistem mengembalikan seluruh kategori**).
 - `POST /api/categories` : Buat kategori baru.
   - Payload: `{ "name": "Gaji", "type": "income" }`
 - `GET /api/categories/{id}` : Detail kategori.

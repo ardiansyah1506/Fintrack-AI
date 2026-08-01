@@ -20,6 +20,9 @@ class IntentDispatcherService
         'create_category' => \App\Intents\Categories\CreateCategoryIntent::class,
         'update_category' => \App\Intents\Categories\UpdateCategoryIntent::class,
         'delete_category' => \App\Intents\Categories\DeleteCategoryIntent::class,
+        'list_categories' => \App\Intents\Categories\ListCategoriesIntent::class,
+        'get_categories' => \App\Intents\Categories\ListCategoriesIntent::class,
+        'categories' => \App\Intents\Categories\ListCategoriesIntent::class,
 
         // Statistics & Reports Module
         'statistics' => \App\Intents\Statistics\StatisticsIntent::class,

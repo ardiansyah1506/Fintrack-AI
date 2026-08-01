@@ -231,6 +231,17 @@ Satu-satunya endpoint webhook terpadu untuk mengeksekusi segala jenis intent _Na
 }
 ```
 
+**Contoh 6: Payload `list_categories` (Ambil Semua Kategori / Filter Type)**
+
+```json
+{
+    "intent": "list_categories",
+    "parameters": {
+        "type": "expense" // Opsional: Kosongkan untuk mengambil seluruh kategori
+    }
+}
+```
+
 - **API Endpoints**:
     - `GET /api/telegram/status` (Mendapatkan indikator bot real-time).
 

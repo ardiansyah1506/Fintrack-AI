@@ -6,26 +6,56 @@ use App\Contracts\Repositories\CategoryRepositoryInterface;
 
 class CategoryService
 {
-    protected $repository;
+    public function __construct(
+        protected CategoryRepositoryInterface $repository
+    ) {}
 
-    public function __construct(CategoryRepositoryInterface $repository)
+    public function getAll(?string $type = null)
     {
-        $this->repository = $repository;
+        $query = $this->repository->query();
+        if ($type !== null && trim($type) !== '') {
+            $query->where('type', strtolower(trim($type)));
+        }
+        return $query->get();
     }
 
-    public function getAll() {
-        return $this->repository->all();
+    public function getAllCategories(?string $type = null)
+    {
+        return $this->getAll($type);
     }
 
-    public function create(array $data) {
+    public function getCategoryById($id)
+    {
+        return $this->repository->find($id);
+    }
+
+    public function create(array $data)
+    {
         return $this->repository->create($data);
     }
 
-    public function update($id, array $data) {
+    public function createCategory(array $data)
+    {
+        return $this->create($data);
+    }
+
+    public function update($id, array $data)
+    {
         return $this->repository->update($id, $data);
     }
 
-    public function delete($id) {
+    public function updateCategory($id, array $data)
+    {
+        return $this->update($id, $data);
+    }
+
+    public function delete($id)
+    {
         return $this->repository->delete($id);
+    }
+
+    public function deleteCategory($id)
+    {
+        return $this->delete($id);
     }
 }
