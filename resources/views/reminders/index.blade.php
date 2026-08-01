@@ -34,7 +34,7 @@
                 <tbody class="divide-y divide-slate-100/80 text-slate-700">
                     @forelse($reminders as $reminder)
                     <tr class="hover:bg-slate-50/50">
-                        <td class="px-6 py-4 font-medium">{{ $reminder->title }}</td>
+                        <td class="px-6 py-4 font-medium">{{ $reminder->name }}</td>
                         <td class="px-6 py-4">{{ $reminder->due_date }} ({{ $reminder->due_time }})</td>
                         <td class="px-6 py-4 flex gap-2">
                             <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg border {{ $reminder->status == 'done' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200' }}">
@@ -45,7 +45,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button @click="showModal = true; editMode = true; currentId = {{ $reminder->id }}; form = { title: '{{ addslashes($reminder->title) }}', due_date: '{{ $reminder->due_date }}', due_time: '{{ $reminder->due_time }}', priority: '{{ $reminder->priority }}', status: '{{ $reminder->status }}' }" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-pen"></i></button>
+                            <button @click="showModal = true; editMode = true; currentId = {{ $reminder->id }}; form = { title: '{{ addslashes($reminder->name) }}', due_date: '{{ $reminder->due_date }}', due_time: '{{ $reminder->due_time }}', priority: '{{ $reminder->priority }}', status: '{{ $reminder->status }}' }" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-pen"></i></button>
                             <form action="{{ route('reminders.destroy', $reminder->id) }}" method="POST" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" onclick="return confirm('Hapus reminder ini?')" class="text-rose-600 hover:text-rose-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
@@ -77,8 +77,8 @@
                     <template x-if="editMode"><input type="hidden" name="_method" value="PUT"></template>
                     
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Judul</label>
-                        <input type="text" name="title" x-model="form.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50" required>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Nama / Judul</label>
+                        <input type="text" name="name" x-model="form.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50" required>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>

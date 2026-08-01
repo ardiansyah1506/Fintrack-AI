@@ -35,7 +35,7 @@
                     <tr class="hover:bg-slate-50/50">
                         <td class="px-6 py-4 font-medium uppercase text-xs">{{ $notif->type }}</td>
                         <td class="px-6 py-4">
-                            <div class="font-bold text-slate-800">{{ $notif->title }}</div>
+                            <div class="font-bold text-slate-800">{{ $notif->name }}</div>
                             <div class="text-xs text-slate-500 truncate max-w-sm">{{ $notif->message }}</div>
                         </td>
                         <td class="px-6 py-4">
@@ -44,7 +44,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button @click="showModal = true; editMode = true; currentId = {{ $notif->id }}; form = { title: '{{ addslashes($notif->title) }}', message: '{{ addslashes($notif->message) }}', type: '{{ $notif->type }}', is_read: '{{ $notif->is_read }}' }" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-pen"></i></button>
+                            <button @click="showModal = true; editMode = true; currentId = {{ $notif->id }}; form = { title: '{{ addslashes($notif->name) }}', message: '{{ addslashes($notif->message) }}', type: '{{ $notif->type }}', is_read: '{{ $notif->is_read }}' }" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-pen"></i></button>
                             <form action="{{ url('notifications', $notif->id) }}" method="POST" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" onclick="return confirm('Hapus notifikasi ini?')" class="text-rose-600 hover:text-rose-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
@@ -77,8 +77,8 @@
                     <input type="hidden" name="user_id" value="1">
                     
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Judul</label>
-                        <input type="text" name="title" x-model="form.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50" required>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Nama / Judul</label>
+                        <input type="text" name="name" x-model="form.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50" required>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Pesan</label>

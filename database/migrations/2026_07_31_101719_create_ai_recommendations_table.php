@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ai_recommendations', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('name');
             $table->text('description');
             $table->string('priority')->default('normal');
             $table->string('status')->default('active');

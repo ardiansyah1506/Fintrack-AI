@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ai_insights', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('name');
             $table->string('period');
             $table->text('content');
             $table->timestamp('generated_at')->useCurrent();

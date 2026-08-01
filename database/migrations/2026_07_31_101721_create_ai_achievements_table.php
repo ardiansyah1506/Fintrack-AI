@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ai_achievements', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('name');
             $table->text('description')->nullable();
             $table->string('reward')->nullable();
             $table->timestamp('achieved_at')->useCurrent();

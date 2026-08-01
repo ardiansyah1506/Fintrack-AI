@@ -1,8 +1,27 @@
 <?php
+
 namespace App\Http\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 class AiAchievementRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
-    public function rules(): array { return ['title' => 'required', 'description' => 'required', 'reward' => 'required', 'achieved_at' => 'required']; }
+
+    protected function prepareForValidation(): void
+    {
+        if (!$this->has('name') && $this->has('title')) {
+            $this->merge(['name' => $this->input('title')]);
+        }
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string',
+            'description' => 'nullable|string',
+            'reward' => 'nullable|string',
+            'achieved_at' => 'nullable',
+        ];
+    }
 }

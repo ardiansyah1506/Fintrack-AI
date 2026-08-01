@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('name');
             $table->text('description')->nullable();
             $table->date('due_date');
             $table->time('due_time')->nullable();

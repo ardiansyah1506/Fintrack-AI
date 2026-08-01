@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('saving_goals', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('name');
             $table->decimal('target_amount', 15, 2);
             $table->decimal('current_amount', 15, 2)->default(0);
             $table->date('deadline')->nullable();

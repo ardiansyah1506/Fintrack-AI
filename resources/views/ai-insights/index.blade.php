@@ -18,16 +18,16 @@
             <table class="w-full text-left text-sm whitespace-nowrap">
                 <thead class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider">
                     <tr>
-                        <th class='px-6 py-4'>title</th><th class='px-6 py-4'>period</th><th class='px-6 py-4'>content</th><th class='px-6 py-4'>generated_at</th>
+                        <th class='px-6 py-4'>name</th><th class='px-6 py-4'>period</th><th class='px-6 py-4'>content</th><th class='px-6 py-4'>generated_at</th>
                         <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @forelse($ai_insights as $item)
                     <tr class="hover:bg-slate-50">
-                        <td class='px-6 py-4 truncate max-w-xs'>{{ $item->title }}</td><td class='px-6 py-4 truncate max-w-xs'>{{ $item->period }}</td><td class='px-6 py-4 truncate max-w-xs'>{{ $item->content }}</td><td class='px-6 py-4 truncate max-w-xs'>{{ $item->generated_at }}</td>
+                        <td class='px-6 py-4 truncate max-w-xs'>{{ $item->name }}</td><td class='px-6 py-4 truncate max-w-xs'>{{ $item->period }}</td><td class='px-6 py-4 truncate max-w-xs'>{{ $item->content }}</td><td class='px-6 py-4 truncate max-w-xs'>{{ $item->generated_at }}</td>
                         <td class="px-6 py-4 text-right">
-                            <button @click="showModal = true; editMode = true; currentId = {{ $item->id }}; form = {'title': '{{ addslashes($item->title ?? "") }}', 'period': '{{ addslashes($item->period ?? "") }}', 'content': '{{ addslashes($item->content ?? "") }}', 'generated_at': '{{ addslashes($item->generated_at ?? "") }}', 'type': '{{ addslashes($item->type ?? "") }}'}" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs"><i class="fa-solid fa-pen"></i></button>
+                            <button @click="showModal = true; editMode = true; currentId = {{ $item->id }}; form = {'title': '{{ addslashes($item->name ?? "") }}', 'period': '{{ addslashes($item->period ?? "") }}', 'content': '{{ addslashes($item->content ?? "") }}', 'generated_at': '{{ addslashes($item->generated_at ?? "") }}', 'type': '{{ addslashes($item->type ?? "") }}'}" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs"><i class="fa-solid fa-pen"></i></button>
                             <form action="{{ url('ai-insights', $item->id) }}" method="POST" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" onclick="return confirm('Hapus data?')" class="text-rose-600 hover:text-rose-800 mx-2 text-xs"><i class="fa-solid fa-trash"></i></button>
@@ -53,8 +53,8 @@
                     <template x-if="editMode"><input type="hidden" name="_method" value="PUT"></template>
                     
                     <div>
-                        <label class='block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2'>title</label>
-                        <input type='text' name='title' x-model='form.title' class='w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500' required>
+                        <label class='block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2'>name</label>
+                        <input type='text' name='name' x-model='form.title' class='w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500' required>
                     </div>
                     <div>
                         <label class='block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2'>period</label>

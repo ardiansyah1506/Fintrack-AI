@@ -38,7 +38,7 @@
                             <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                                 <i class="fa-solid {{ $goal->icon ?? 'fa-bullseye' }}"></i>
                             </div>
-                            {{ $goal->title }}
+                            {{ $goal->name }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="font-bold text-slate-800">Rp {{ number_format($goal->current_amount, 0, ',', '.') }} <span class="text-xs text-slate-400 font-normal">/ Rp {{ number_format($goal->target_amount, 0, ',', '.') }}</span></div>
@@ -53,7 +53,7 @@
                             <div class="text-xs text-rose-500 mt-1 font-semibold">{{ $goal->deadline ? date('d M Y', strtotime($goal->deadline)) : 'No Target Date' }}</div>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button @click="showModal = true; editMode = true; currentId = {{ $goal->id }}; form = { title: '{{ addslashes($goal->title) }}', target_amount: '{{ $goal->target_amount }}', current_amount: '{{ $goal->current_amount }}', deadline: '{{ $goal->deadline }}', icon: '{{ $goal->icon }}', status: '{{ $goal->status }}' }" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-pen"></i></button>
+                            <button @click="showModal = true; editMode = true; currentId = {{ $goal->id }}; form = { title: '{{ addslashes($goal->name) }}', target_amount: '{{ $goal->target_amount }}', current_amount: '{{ $goal->current_amount }}', deadline: '{{ $goal->deadline }}', icon: '{{ $goal->icon }}', status: '{{ $goal->status }}' }" class="text-indigo-600 hover:text-indigo-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-pen"></i></button>
                             <form action="{{ url('saving-goals', $goal->id) }}" method="POST" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" onclick="return confirm('Hapus Target ini?')" class="text-rose-600 hover:text-rose-800 mx-2 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
@@ -86,7 +86,7 @@
                     
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Nama Target (Resolusi)</label>
-                        <input type="text" name="title" x-model="form.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50" required placeholder="Contoh: DP Rumah, Liburan, Dana Darurat">
+                        <input type="text" name="name" x-model="form.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50" required placeholder="Contoh: DP Rumah, Liburan, Dana Darurat">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>

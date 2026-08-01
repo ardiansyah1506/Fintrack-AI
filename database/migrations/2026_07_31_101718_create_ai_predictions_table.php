@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ai_predictions', function (Blueprint $table) {
             $table->id();
             $table->string('prediction_type');
-            $table->string('title');
+            $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('confidence', 5, 2)->default(0);
             $table->timestamp('generated_at')->useCurrent();
