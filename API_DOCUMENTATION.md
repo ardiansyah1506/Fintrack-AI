@@ -156,7 +156,7 @@ Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent
 | | `report` / `daily_report` | `date` (YYYY-MM-DD) |
 | | `weekly_report` | `start_date`, `end_date` |
 | | `monthly_report` | `year`, `month` |
-| **Reminder** | `create_reminder` | `title`, `due_date`, `notes` |
+| **Reminder** | `create_reminder` | `name` (atau `title`), `due_date`, `notes` |
 | | `update_reminder` | `id`, `status` (pending/completed) |
 | | `delete_reminder` | `id` |
 | | `list_reminders` | `status` (pending/completed) |
@@ -274,7 +274,7 @@ Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent
 ### A. Reminders (Pengingat)
 - `GET /api/reminders` : List pengingat.
 - `POST /api/reminders` : Buat pengingat baru.
-  - Payload: `{ "title": "Bayar Listrik", "due_date": "2026-08-05 10:00:00", "notes": "Token PLN" }`
+  - Payload: `{ "name": "Bayar Listrik", "due_date": "2026-08-05 10:00:00", "notes": "Token PLN" }` *(Dukungan field legacy `title` tetap aktif secara otomatis).*
 - `GET /api/reminders/{id}` : Detail pengingat.
 - `PUT /api/reminders/{id}` : Update pengingat.
 - `DELETE /api/reminders/{id}` : Hapus pengingat.
@@ -307,6 +307,7 @@ Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent
 ### E. Notifications
 - `GET /api/notifications` : List notifikasi.
 - `POST /api/notifications` : Injeksi notifikasi dari n8n.
+  - Payload: `{ "name": "Bayar Tagihan", "message": "Jatuh tempo hari ini", "type": "info" }`
 - `GET /api/notifications/{id}` : Detail notifikasi.
 - `PUT /api/notifications/{id}` : Tandai dibaca (`is_read: true`).
 - `DELETE /api/notifications/{id}` : Hapus notifikasi.
@@ -317,14 +318,16 @@ Endpoint tunggal utama yang dipanggil oleh n8n setelah Gemini mengekstrak Intent
 
 Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi penulisan dan pembacaan memori/log AI oleh n8n.
 
+*(Catatan Migrasi: Kolom `title` telah disatukan secara konsisten menjadi `name` pada seluruh tabel database AI Center dengan backward-compatibility layer pada Eloquent Model Accessor/Mutator & Request Mapper).*
+
 ### A. AI Insights
 - **Route Utama:** `GET|POST /api/insights` (Alias: `/api/ai-insights`)
 - **Payload POST:**
 ```json
 {
-    "title": "Analisis Pengeluaran Mingguan",
+    "name": "Analisis Pengeluaran Mingguan",
     "content": "Pengeluaran makanan meningkat 15% dibanding minggu lalu.",
-    "category": "expense_trend"
+    "type": "weekly"
 }
 ```
 
@@ -333,9 +336,10 @@ Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi pe
 - **Payload POST:**
 ```json
 {
-    "type": "cashflow_forecast",
-    "prediction_value": "Diperkirakan saldo tersisa Rp 2.500.000 pada akhir bulan.",
-    "confidence_score": 92.5
+    "name": "Cashflow Forecast",
+    "prediction_type": "cashflow_forecast",
+    "description": "Diperkirakan saldo tersisa Rp 2.500.000 pada akhir bulan.",
+    "confidence": 92.5
 }
 ```
 
@@ -344,8 +348,9 @@ Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi pe
 - **Payload POST:**
 ```json
 {
-    "context": "Penghematan Langganan",
-    "advice": "Batalkan langganan yang jarang dipakai untuk menghemat Rp 150.000/bulan."
+    "name": "Penghematan Langganan",
+    "description": "Batalkan langganan yang jarang dipakai untuk menghemat Rp 150.000/bulan.",
+    "priority": "medium"
 }
 ```
 
@@ -354,8 +359,9 @@ Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi pe
 - **Payload POST:**
 ```json
 {
+    "name": "Batas Anggaran Makanan",
     "severity": "high",
-    "message": "Peringatan! Pengeluaran kategori Makanan telah mencapai 90% dari batas anggaran."
+    "description": "Peringatan! Pengeluaran kategori Makanan telah mencapai 90% dari batas anggaran."
 }
 ```
 
@@ -364,7 +370,7 @@ Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi pe
 - **Payload POST:**
 ```json
 {
-    "badge": "Smart Saver",
+    "name": "Smart Saver",
     "description": "Berhasil mempertahankan rasio tabungan di atas 30% selama 3 bulan berturut-turut!"
 }
 ```

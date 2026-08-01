@@ -31,7 +31,7 @@ Semua pengolahan logic AI (pengingat jatuh tempo, generasi _insight_, parsing st
 
 ```json
 {
-    "title": "Membayar cicilan asuransi motor",
+    "name": "Membayar cicilan asuransi motor",
     "description": "Auto debit dari rekening utama BCA",
     "due_date": "2026-08-01",
     "due_time": "09:00:00",
@@ -42,7 +42,7 @@ Semua pengolahan logic AI (pengingat jatuh tempo, generasi _insight_, parsing st
 }
 ```
 
-_(Catatan Enum: `repeat` = none, daily, weekly, monthly, yearly. `priority` = low, medium, high. `status` = pending, done, cancelled)._
+_(Catatan Enum: `repeat` = none, daily, weekly, monthly, yearly. `priority` = low, medium, high. `status` = pending, done, cancelled. Payload menerima `name` maupun legacy `title` secara otomatis)._
 
 ### B. Recurring Bills (Tagihan Rutin)
 
@@ -107,7 +107,7 @@ _(Catatan Enum: `repeat` = none, daily, weekly, monthly, yearly. `priority` = lo
     "data": [
         {
             "id": 1,
-            "title": "Beli MacBook Pro M4",
+            "name": "Beli MacBook Pro M4",
             "target_amount": 35000000.0,
             "current_amount": 10000000.0,
             "deadline": "2026-12-31",
@@ -132,7 +132,7 @@ _(Catatan Enum: `repeat` = none, daily, weekly, monthly, yearly. `priority` = lo
     "data": [
         {
             "id": 5,
-            "title": "Lonjakan Pengeluaran Hiburan",
+            "name": "Lonjakan Pengeluaran Hiburan",
             "period": "Minggu 3 Juli 2026",
             "content": "Analisis AI menunjukkan anomali pengeluaran hiburan...",
             "generated_at": "2026-07-31T09:00:00.000000Z",
@@ -155,7 +155,7 @@ _(Catatan Enum: `repeat` = none, daily, weekly, monthly, yearly. `priority` = lo
     "data": [
         {
             "id": 9,
-            "title": "Transaksi Berhasil Dicatat Bot",
+            "name": "Transaksi Berhasil Dicatat Bot",
             "message": "Transaksi 50.000 kategori Transport berhasil dibuat",
             "type": "success",
             "read_at": null,
@@ -190,7 +190,7 @@ Satu-satunya endpoint webhook terpadu untuk mengeksekusi segala jenis intent _Na
 ```json
 {
     "intent": "create_reminder",
-    "title": "Bayar cicilan motor",
+    "name": "Bayar cicilan motor",
     "due_date": "2026-08-01",
     "due_time": "09:00",
     "priority": "high",
@@ -225,7 +225,7 @@ Satu-satunya endpoint webhook terpadu untuk mengeksekusi segala jenis intent _Na
 ```json
 {
     "intent": "create_saving_goal",
-    "title": "Liburan Jepang",
+    "name": "Liburan Jepang",
     "target_amount": 20000000,
     "deadline": "2027-12-31"
 }
@@ -316,7 +316,7 @@ Semua route mendukung skema: `GET` (List all search & paginate), `POST` (Create/
     - **Route:** `/api/ai-logs`
     - **Asumsi Parameter POST:** json `{ "endpoint": "n8n/gemini", "duration_ms": 1500, "status": "success" }`
 
-> **Note Validasi:** Jika n8n mem-posting data yang salah atau kurang argumen `required`, server secara otomatis mem-bounce request dengan JSON tipe HTTP 422: `{"message": "The given data was invalid", "errors": {"title": ["The title field is required."]}}`.
+> **Note Validasi:** Jika n8n mem-posting data yang salah atau kurang argumen `required`, server secara otomatis mem-bounce request dengan JSON tipe HTTP 422: `{"message": "The given data was invalid", "errors": {"name": ["The name field is required."]}}`.
 
 ## ✅ Status Sistem Refactor: STABIL (100% Backward & Forward Ready)
 
