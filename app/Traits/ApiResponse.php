@@ -9,13 +9,19 @@ trait ApiResponse
     /**
      * Build standard JSON success response
      */
-    protected function successResponse($data = [], string $message = 'Success', int $code = 200): JsonResponse
+    protected function successResponse($data = [], string $message = 'Success', int $code = 200, ?string $intent = null): JsonResponse
     {
-        return response()->json([
+        $response = [
             'success' => true,
             'message' => $message,
             'data'    => $data
-        ], $code);
+        ];
+
+        if ($intent !== null) {
+            $response['intent'] = $intent;
+        }
+
+        return response()->json($response, $code);
     }
 
     /**

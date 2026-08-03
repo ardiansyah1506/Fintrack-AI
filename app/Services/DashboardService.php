@@ -19,19 +19,35 @@ class DashboardService
     /**
      * Get main summary metrics for dashboard cards.
      */
-    public function getSummaryMetrics(): array
+    public function getSummaryMetrics(array $filters = []): array
     {
-        $now = Carbon::now();
+        // Parse custom date from filters, fallback to current month
+        $dates = null;
+        if (!empty($filters['period'])) {
+            $dates = \App\Helpers\DateParserHelper::parsePeriod($filters['period']);
+        }
+        
+        if ($dates && count($dates) === 2) {
+            $startDate = $dates[0]->format('Y-m-d');
+            $endDate = $dates[1]->format('Y-m-d');
+            
+            $totalIncome = (float) $this->transactionRepository->sumByTypeAndDateRange('income', $startDate, $endDate);
+            $totalExpense = (float) $this->transactionRepository->sumByTypeAndDateRange('expense', $startDate, $endDate);
+            $monthlyIncome = $totalIncome;
+            $monthlyExpense = $totalExpense;
+        } else {
+            $now = Carbon::now();
+            $totalIncome = (float) $this->transactionRepository->sumByTypeAndMonth('income', $now->year, $now->month);
+            $totalExpense = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $now->year, $now->month);
+            $monthlyIncome = $totalIncome;
+            $monthlyExpense = $totalExpense;
+        }
 
-        $totalIncome = (float) $this->transactionRepository->sumByTypeAndMonth('income', $now->year, $now->month);
-        $totalExpense = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $now->year, $now->month);
         $currentBalance = $totalIncome - $totalExpense;
-
-        $monthlyIncome = (float) $this->transactionRepository->sumByTypeAndMonth('income', $now->year, $now->month);
-        $monthlyExpense = (float) $this->transactionRepository->sumByTypeAndMonth('expense', $now->year, $now->month);
-
         $monthlyBalance = $monthlyIncome - $monthlyExpense;
-        $totalTransactionsCount = $this->transactionRepository->countAll();
+        
+        $queryResult = $this->transactionRepository->getFilteredSummary($filters);
+        $totalTransactionsCount = $queryResult['total_count'] ?? 0;
 
         return [
             'current_balance' => $currentBalance,
@@ -69,10 +85,10 @@ class DashboardService
     /**
      * Get complete dashboard payload.
      */
-    public function getDashboardData(): array
+    public function getDashboardData(array $filters = []): array
     {
         return [
-            'summary' => $this->getSummaryMetrics(),
+            'summary' => $this->getSummaryMetrics($filters),
             'recent_transactions' => $this->getRecentTransactions(5),
             'bills_count' => $this->recurringBillRepository->countByStatus('active'),
             'reminders_count' => $this->reminderRepository->countByStatus('pending'),

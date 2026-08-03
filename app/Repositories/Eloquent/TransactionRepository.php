@@ -37,11 +37,9 @@ class TransactionRepository implements TransactionRepositoryInterface
         if (!empty($filters['type'])) { $query->where('type', strtolower($filters['type'])); }
         if (!empty($filters['category'])) { $query->where('category', $filters['category']); }
         if (!empty($filters['period'])) {
-            $now = \Carbon\Carbon::now();
-            switch ($filters['period']) {
-                case 'today': case 'daily': case 'harian': $query->whereDate('transaction_date', $now->format('Y-m-d')); break;
-                case 'this_week': case 'weekly': case 'mingguan': $query->whereBetween('transaction_date', [$now->copy()->startOfWeek()->format('Y-m-d'), $now->copy()->endOfWeek()->format('Y-m-d')]); break;
-                case 'this_month': case 'monthly': case 'bulanan': $query->whereBetween('transaction_date', [$now->copy()->startOfMonth()->format('Y-m-d'), $now->copy()->endOfMonth()->format('Y-m-d')]); break;
+            $dates = \App\Helpers\DateParserHelper::parsePeriod($filters['period']);
+            if ($dates && count($dates) === 2) {
+                $query->whereBetween('transaction_date', [$dates[0]->format('Y-m-d'), $dates[1]->format('Y-m-d')]);
             }
         }
         if (!empty($filters['date_start'])) { $query->whereDate('transaction_date', '>=', $filters['date_start']); }
