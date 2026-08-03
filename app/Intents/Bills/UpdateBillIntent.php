@@ -8,7 +8,7 @@ class UpdateBillIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'update_bill', 
             'status' => 'success',
             'intent' => 'UpdateBillIntent',
             'message' => 'Intent UpdateBillIntent executed successfully. Validating Dispatcher...'

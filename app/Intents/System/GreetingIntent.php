@@ -8,7 +8,7 @@ class GreetingIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'greeting', 
             'status' => 'success',
             'message' => 'Halo! Saya FinTrack AI Assistant. Ada yang bisa saya bantu mengelola keuangan Anda hari ini?',
             'data' => [

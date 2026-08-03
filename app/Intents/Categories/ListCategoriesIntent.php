@@ -22,7 +22,7 @@ class ListCategoriesIntent implements IntentInterface
 
         $categories = $query->get();
 
-        return [
+        return ['intent' => 'list_categories', 
             'status' => 'success',
             'message' => 'Berhasil mengambil daftar kategori.',
             'data' => $categories

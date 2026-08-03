@@ -8,7 +8,7 @@ class ListMemoriesIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'list_memories', 
             'status' => 'success',
             'intent' => 'ListMemoriesIntent',
             'message' => 'Intent ListMemoriesIntent executed successfully. Validating Dispatcher...'

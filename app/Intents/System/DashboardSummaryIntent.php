@@ -8,7 +8,7 @@ class DashboardSummaryIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'dashboard_summary', 
             'status' => 'success',
             'intent' => 'DashboardSummaryIntent',
             'message' => 'Intent DashboardSummaryIntent executed successfully. Validating Dispatcher...'

@@ -8,7 +8,7 @@ class SavingProgressIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'saving_progress', 
             'status' => 'success',
             'intent' => 'SavingProgressIntent',
             'message' => 'Intent SavingProgressIntent executed successfully. Validating Dispatcher...'

@@ -17,7 +17,7 @@ class CreateCategoryIntent implements IntentInterface
         $type = $parameters['type'] ?? 'expense';
 
         if (!$name) {
-            return [
+            return ['intent' => 'create_category', 
                 'status' => 'error',
                 'message' => 'Parameter name wajib diisi untuk membuat kategori.'
             ];
@@ -28,7 +28,7 @@ class CreateCategoryIntent implements IntentInterface
             'type' => $type
         ]);
 
-        return [
+        return ['intent' => 'create_category', 
             'status' => 'success',
             'message' => "Kategori '{$category->name}' berhasil dibuat.",
             'data' => $category

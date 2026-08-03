@@ -8,7 +8,7 @@ class DeleteSavingGoalIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'delete_saving_goal', 
             'status' => 'success',
             'intent' => 'DeleteSavingGoalIntent',
             'message' => 'Intent DeleteSavingGoalIntent executed successfully. Validating Dispatcher...'

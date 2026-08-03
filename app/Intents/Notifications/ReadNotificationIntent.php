@@ -8,7 +8,7 @@ class ReadNotificationIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'read_notification', 
             'status' => 'success',
             'intent' => 'ReadNotificationIntent',
             'message' => 'Intent ReadNotificationIntent executed successfully. Validating Dispatcher...'

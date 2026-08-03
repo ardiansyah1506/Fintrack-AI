@@ -15,7 +15,7 @@ class DeleteCategoryIntent implements IntentInterface
     {
         $id = $parameters['id'] ?? null;
         if (!$id) {
-            return [
+            return ['intent' => 'delete_category', 
                 'status' => 'error',
                 'message' => 'Parameter id kategori wajib disertakan.'
             ];
@@ -23,7 +23,7 @@ class DeleteCategoryIntent implements IntentInterface
 
         $this->categoryRepository->delete($id);
 
-        return [
+        return ['intent' => 'delete_category', 
             'status' => 'success',
             'message' => "Kategori berhasil dihapus."
         ];

@@ -8,7 +8,7 @@ class ListBillsIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'list_bills', 
             'status' => 'success',
             'intent' => 'ListBillsIntent',
             'message' => 'Intent ListBillsIntent executed successfully. Validating Dispatcher...'

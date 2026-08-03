@@ -8,7 +8,7 @@ class UpdateSavingGoalIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'update_saving_goal', 
             'status' => 'success',
             'intent' => 'UpdateSavingGoalIntent',
             'message' => 'Intent UpdateSavingGoalIntent executed successfully. Validating Dispatcher...'

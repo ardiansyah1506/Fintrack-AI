@@ -15,7 +15,7 @@ class UpdateCategoryIntent implements IntentInterface
     {
         $id = $parameters['id'] ?? null;
         if (!$id) {
-            return [
+            return ['intent' => 'update_category', 
                 'status' => 'error',
                 'message' => 'Parameter id kategori wajib disertakan.'
             ];
@@ -28,7 +28,7 @@ class UpdateCategoryIntent implements IntentInterface
 
         $category = $this->categoryRepository->update($id, $data);
 
-        return [
+        return ['intent' => 'update_category', 
             'status' => 'success',
             'message' => "Kategori berhasil diperbarui.",
             'data' => $category

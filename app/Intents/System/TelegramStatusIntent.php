@@ -8,7 +8,7 @@ class TelegramStatusIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'telegram_status', 
             'status' => 'success',
             'intent' => 'TelegramStatusIntent',
             'message' => 'Intent TelegramStatusIntent executed successfully. Validating Dispatcher...'

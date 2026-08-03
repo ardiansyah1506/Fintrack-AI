@@ -8,7 +8,7 @@ class UpdateReminderIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'update_reminder', 
             'status' => 'success',
             'intent' => 'UpdateReminderIntent',
             'message' => 'Intent UpdateReminderIntent executed successfully. Validating Dispatcher...'

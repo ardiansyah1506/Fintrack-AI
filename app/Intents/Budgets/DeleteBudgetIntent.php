@@ -8,7 +8,7 @@ class DeleteBudgetIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'delete_budget', 
             'status' => 'success',
             'intent' => 'DeleteBudgetIntent',
             'message' => 'Intent DeleteBudgetIntent executed successfully. Validating Dispatcher...'

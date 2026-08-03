@@ -26,4 +26,34 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 422);
             }
         });
+
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan',
+                    'errors' => ['id' => 'Data untuk parameter ini tidak ditemukan di database.']
+                ], 404);
+            }
+        });
+        
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Route atau Data tidak ditemukan',
+                    'errors' => ['url' => 'Endpoint ini tidak tersedia.']
+                ], 404);
+            }
+        });
+        
+        $exceptions->render(function (\Exception $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan sistem',
+                    'errors' => ['server' => env('APP_DEBUG') ? $e->getMessage() : 'Internal Server Error']
+                ], 500);
+            }
+        });
     })->create();

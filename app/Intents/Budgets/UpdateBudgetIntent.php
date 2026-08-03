@@ -8,7 +8,7 @@ class UpdateBudgetIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'update_budget', 
             'status' => 'success',
             'intent' => 'UpdateBudgetIntent',
             'message' => 'Intent UpdateBudgetIntent executed successfully. Validating Dispatcher...'

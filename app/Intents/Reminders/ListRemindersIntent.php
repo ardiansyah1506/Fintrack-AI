@@ -8,7 +8,7 @@ class ListRemindersIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'list_reminders', 
             'status' => 'success',
             'intent' => 'ListRemindersIntent',
             'message' => 'Intent ListRemindersIntent executed successfully. Validating Dispatcher...'

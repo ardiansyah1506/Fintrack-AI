@@ -20,6 +20,6 @@ class ReportIntent implements IntentInterface {
             $month = (int) ($params['month'] ?? $now->month);
             return ['intent' => 'monthly_report', 'report' => $this->reportService->getMonthlyReport($year, $month)];
         }
-        return [];
+        return ['intent' => 'report', ];
     }
 }

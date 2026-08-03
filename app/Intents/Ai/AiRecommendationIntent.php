@@ -8,7 +8,7 @@ class AiRecommendationIntent implements IntentInterface
 {
     public function handle(array $parameters): array
     {
-        return [
+        return ['intent' => 'ai_recommendation', 
             'status' => 'success',
             'intent' => 'AiRecommendationIntent',
             'message' => 'Intent AiRecommendationIntent executed successfully. Validating Dispatcher...'
