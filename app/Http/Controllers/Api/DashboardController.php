@@ -17,9 +17,14 @@ class DashboardController extends Controller
     /**
      * GET /api/dashboard
      */
-    public function index()
+    public function index(
+        \App\Services\BudgetService $budgetService,
+        \App\Contracts\Repositories\SavingGoalRepositoryInterface $savingRepo
+    )
     {
         $data = $this->dashboardService->getDashboardData();
+        $data['budgetProgress'] = $budgetService->getBudgetSummary();
+        $data['savingGoals'] = $savingRepo->all();
 
         return $this->successResponse(
             $data,

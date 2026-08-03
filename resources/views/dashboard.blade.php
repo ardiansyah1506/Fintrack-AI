@@ -30,23 +30,23 @@
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 lg:gap-5">
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-wallet text-slate-300"></i> Current Balance</p>
-                <h3 class="text-2xl font-bold text-slate-800 mt-2">Rp 24.500.000</h3>
+                <h3 class="text-2xl font-bold {{ $summary['current_balance'] >= 0 ? 'text-slate-800' : 'text-rose-600' }} mt-2">{{ formatCurrency($summary['current_balance']) }}</h3>
             </div>
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-arrow-down text-emerald-500"></i> Today's Income</p>
-                <h3 class="text-2xl font-bold text-emerald-500 mt-2">Rp 2.000.000</h3>
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-arrow-down text-emerald-500"></i> Monthly Income</p>
+                <h3 class="text-2xl font-bold text-emerald-500 mt-2">{{ formatCurrency($summary['monthly_income']) }}</h3>
             </div>
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-arrow-up text-rose-500"></i> Today's Expense</p>
-                <h3 class="text-2xl font-bold text-rose-500 mt-2">Rp 350.000</h3>
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-arrow-up text-rose-500"></i> Monthly Expense</p>
+                <h3 class="text-2xl font-bold text-rose-500 mt-2">{{ formatCurrency($summary['monthly_expense']) }}</h3>
             </div>
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-amber-500"></i> Upcoming Bills</p>
-                <h3 class="text-2xl font-bold text-amber-500 mt-2">3 Due</h3>
+                <h3 class="text-2xl font-bold text-amber-500 mt-2">{{ $bills_count }} Due</h3>
             </div>
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-bell text-indigo-500"></i> Upcoming Task</p>
-                <h3 class="text-2xl font-bold text-indigo-500 mt-2">1 Reminder</h3>
+                <h3 class="text-2xl font-bold text-indigo-500 mt-2">{{ $reminders_count }} Reminder</h3>
             </div>
             <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition">
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-brands fa-telegram text-blue-500"></i> N8N Sync</p>
@@ -185,28 +185,33 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
+                        @forelse($recent_transactions as $tx)
                         <tr class="hover:bg-slate-50/70 transition">
-                            <td class="px-6 py-4 text-slate-500 break-keep">31 Jul 2026</td>
-                            <td class="px-6 py-4 font-medium text-slate-700">Makan Siang Bareng</td>
+                            <td class="px-6 py-4 text-slate-500 break-keep">{{ \Carbon\Carbon::parse($tx->transaction_date)->format('d M Y') }}</td>
+                            <td class="px-6 py-4 font-medium text-slate-700">{{ $tx->description }}</td>
                             <td class="px-6 py-4">
-                                <span class="bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold">Makan</span>
+                                <span class="bg-indigo-100 text-indigo-600 px-2.5 py-1 rounded-lg text-xs font-bold">{{ $tx->category }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold"><i class="fa-brands fa-telegram mr-1"></i> Telegram AI</span>
+                                <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-bold">
+                                    @if($tx->source === 'telegram' || stripos($tx->notes, 'telegram') !== false)
+                                        <i class="fa-brands fa-telegram mr-1 text-blue-500"></i> Telegram
+                                    @elseif($tx->source === 'bot' || $tx->source === 'n8n' || stripos($tx->notes, 'n8n') !== false)
+                                        <i class="fa-solid fa-robot mr-1 text-emerald-500"></i> Automation
+                                    @else
+                                        <i class="fa-solid fa-user mr-1 text-slate-500"></i> Apps / Web
+                                    @endif
+                                </span>
                             </td>
-                            <td class="px-6 py-4 text-right font-bold text-rose-500">- Rp 45.000</td>
+                            <td class="px-6 py-4 text-right font-bold {{ $tx->type === 'income' ? 'text-emerald-500' : 'text-rose-500' }}">
+                                {{ $tx->type === 'income' ? '+' : '-' }} {{ formatCurrency($tx->amount) }}
+                            </td>
                         </tr>
-                        <tr class="hover:bg-slate-50/70 transition">
-                            <td class="px-6 py-4 text-slate-500 break-keep">30 Jul 2026</td>
-                            <td class="px-6 py-4 font-medium text-slate-700">Gaji Karyawan</td>
-                            <td class="px-6 py-4">
-                                <span class="bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-lg text-xs font-bold">Gaji</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-lg text-xs font-bold"><i class="fa-solid fa-robot mr-1"></i> n8n Automation</span>
-                            </td>
-                            <td class="px-6 py-4 text-right font-bold text-emerald-500">+ Rp 15.000.000</td>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada transaksi terbaru.</td>
                         </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -225,86 +230,65 @@
             // 1. Income vs Expense (Bar)
             new Chart(document.getElementById('chartIncomeExpense'), {
                 type: 'bar',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [
-                        { label: 'Income', data: [5000, 2000, 15000, 3000], backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Expense', data: [2000, 2500, 1800, 4000], backgroundColor: '#f43f5e', borderRadius: 6 }
-                    ]
-                },
+                data: @json($income_vs_expense_chart),
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
             // 2. Expense Category (Doughnut)
             new Chart(document.getElementById('chartExpenseCategory'), {
                 type: 'doughnut',
-                data: {
-                    labels: ['Makan', 'Transport', 'Hiburan', 'Belanja'],
-                    datasets: [{
-                        data: [45, 20, 15, 20],
-                        backgroundColor: ['#f43f5e', '#f59e0b', '#8b5cf6', '#0ea5e9'],
-                        borderWidth: 0
-                    }]
-                },
+                data: @json($expense_by_category_chart),
                 options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right' } } }
             });
 
-            // 3. Cashflow Trend (Line)
+            // 3. Cashflow Trend (Line) (Using Weekly Trend Data)
             new Chart(document.getElementById('chartCashflow'), {
                 type: 'line',
-                data: {
-                    labels: ['1', '2', '3', '4', '5', '6', '7'],
-                    datasets: [{
-                        label: 'Gross',
-                        data: [10, 15, 8, 20, 18, 30, 25],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                data: @json($weekly_trend_chart),
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
             // 4. Monthly Trend (Line)
             new Chart(document.getElementById('chartMonthlyTrend'), {
                 type: 'line',
-                data: {
-                    labels: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-                    datasets: [{
-                        label: 'Net Balance',
-                        data: [5, 8, 12, 11, 15, 24],
-                        borderColor: '#10b981',
-                        borderWidth: 3,
-                        tension: 0.3
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: @json($monthly_trend_chart),
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
+
+            // Prepare Budget data
+            const budgets = @json($budgetProgress ?? []);
+            const budgetLabels = budgets.map(b => b.category);
+            const budgetData = budgets.map(b => b.percentage);
+            const budgetColors = budgets.map(b => b.status_color === 'red' ? '#f43f5e' : (b.status_color === 'yellow' ? '#f59e0b' : '#10b981'));
 
             // 5. Budget Progress (Horizontal Bar)
             new Chart(document.getElementById('chartBudgetProgress'), {
                 type: 'bar',
                 data: {
-                    labels: ['Makan', 'Otomotif', 'Kesehatan'],
+                    labels: budgetLabels.length ? budgetLabels : ['Belum ada budget'],
                     datasets: [{
                         label: 'Usage (%)',
-                        data: [75, 45, 20],
-                        backgroundColor: ['#f43f5e', '#f59e0b', '#10b981'],
+                        data: budgetData.length ? budgetData : [0],
+                        backgroundColor: budgetLabels.length ? budgetColors : ['#e2e8f0'],
                         borderRadius: 6
                     }]
                 },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { max: 100 } }, plugins: { legend: { display: false } } }
             });
 
+            // Prepare Saving data
+            const savings = @json($savingGoals ?? []);
+            const savingLabels = savings.map(s => s.name);
+            const savingData = savings.map(s => s.target_amount > 0 ? Math.round((s.current_amount / s.target_amount)*100) : 0);
+            
             // 6. Saving Progress (Polar Area)
             new Chart(document.getElementById('chartSavingProgress'), {
                 type: 'polarArea',
                 data: {
-                    labels: ['Liburan', 'Motor', 'Darurat'],
+                    labels: savingLabels.length ? savingLabels : ['Belum ada target'],
                     datasets: [{
-                        data: [60, 40, 85],
-                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+                        data: savingData.length ? savingData : [0],
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#f43f5e'],
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }

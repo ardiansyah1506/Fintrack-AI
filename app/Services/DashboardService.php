@@ -74,6 +74,8 @@ class DashboardService
         return [
             'summary' => $this->getSummaryMetrics(),
             'recent_transactions' => $this->getRecentTransactions(5),
+            'bills_count' => $this->recurringBillRepository->countByStatus('active'),
+            'reminders_count' => $this->reminderRepository->countByStatus('pending'),
             'income_vs_expense_chart' => $this->statisticService->getIncomeVsExpenseChartData(),
             'expense_by_category_chart' => $this->statisticService->getExpenseByCategoryChartData(),
             'weekly_trend_chart' => $this->statisticService->getWeeklyTrendChartData(),
