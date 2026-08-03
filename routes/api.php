@@ -57,6 +57,9 @@ Route::name('api.')->group(function () {
     Route::apiResource('prompts', \App\Http\Controllers\Api\PromptController::class);
     Route::apiResource('ai-logs', \App\Http\Controllers\Api\AiLogController::class);
 
+    // Combined Data
+    Route::get('/combined-data', [\App\Http\Controllers\Api\CombinedDataController::class, 'index'])->name('combined-data');
+
     // Dashboard & System
     Route::get('/dashboard/ai', [\App\Http\Controllers\Api\DashboardController::class, 'aiSummary']);
     Route::get('/telegram/status', [\App\Http\Controllers\Api\TelegramStatusController::class, 'index']);
