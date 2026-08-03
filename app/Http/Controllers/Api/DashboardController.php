@@ -18,17 +18,20 @@ class DashboardController extends Controller
      * GET /api/dashboard
      */
     public function index(
+        \Illuminate\Http\Request $request,
         \App\Services\BudgetService $budgetService,
         \App\Contracts\Repositories\SavingGoalRepositoryInterface $savingRepo
     )
     {
-        $data = $this->dashboardService->getDashboardData();
+        $data = $this->dashboardService->getDashboardData($request->query());
         $data['budgetProgress'] = $budgetService->getBudgetSummary();
         $data['savingGoals'] = $savingRepo->all();
 
         return $this->successResponse(
             $data,
-            'Berhasil mengambil data dashboard'
+            'Berhasil mengambil data dashboard',
+            200,
+            'dashboard_summary'
         );
     }
 
@@ -41,7 +44,9 @@ class DashboardController extends Controller
 
         return $this->successResponse(
             $data,
-            'Data AI Summary Berhasil'
+            'Data AI Summary Berhasil',
+            200,
+            'ai_summary'
         );
     }
 }

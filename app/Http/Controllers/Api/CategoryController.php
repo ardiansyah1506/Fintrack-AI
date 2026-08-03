@@ -27,7 +27,9 @@ class CategoryController extends Controller
 
         return $this->successResponse(
             CategoryResource::collection($categories),
-            'Berhasil mengambil data kategori'
+            'Berhasil mengambil data kategori',
+            200,
+            'category_list'
         );
     }
 
@@ -41,7 +43,8 @@ class CategoryController extends Controller
         return $this->successResponse(
             new CategoryResource($category),
             'Kategori berhasil dibuat',
-            201
+            201,
+            'category_create'
         );
     }
 
@@ -54,7 +57,9 @@ class CategoryController extends Controller
 
         return $this->successResponse(
             new CategoryResource($category),
-            'Berhasil mengambil detail kategori'
+            'Berhasil mengambil detail kategori',
+            200,
+            'category_detail'
         );
     }
 
@@ -67,7 +72,9 @@ class CategoryController extends Controller
 
         return $this->successResponse(
             new CategoryResource($category),
-            'Kategori berhasil diperbarui'
+            'Kategori berhasil diperbarui',
+            200,
+            'category_update'
         );
     }
 
@@ -80,7 +87,9 @@ class CategoryController extends Controller
 
         return $this->successResponse(
             null,
-            'Kategori berhasil dihapus'
+            'Kategori berhasil dihapus',
+            200,
+            'category_delete'
         );
     }
 }
