@@ -2,13 +2,16 @@
 
 Update ini mendokumentasikan keseluruhan fitur dan _routes_ (Web & REST API) pada sistem **FinTrack AI** yang baru saja dirombak menjadi **Control Center** untuk sinkronisasi otomatis dengan AI Telegram Assistant (via n8n).
 
+> 📄 Untuk dokumentasi lengkap workflow n8n, lihat [`N8N_WORKFLOW_DOCS.md`](N8N_WORKFLOW_DOCS.md)
+
 ---
 
 ## 🏗️ 1. Arsitektur & Teknologi
 
 - **Frontend Dashboard/UI**: Laravel Blade, Tailwind CSS (CDN), Alpine.js (CDN), Chart.js (CDN).
 - **Backend Source of Truth**: Laravel 12 (Service Pattern + Form Request Validation).
-- **AI Orchestrator Target**: N8N Automation & webhook Telegram Bot.
+- **AI Orchestrator**: n8n Automation & Telegram Bot Webhook.
+- **AI Engine**: Groq API (LLaMA 3.3 70B Versatile) — untuk NLP intent extraction & AI analysis.
 
 Semua pengolahan logic AI (pengingat jatuh tempo, generasi _insight_, parsing struk dari chat telegram) dieksekusi di ranah **n8n**. Laravel hanya menyediakan API JSON dan UI Control Center berbasis Web untuk memonitor data.
 
@@ -249,12 +252,19 @@ Satu-satunya endpoint webhook terpadu untuk mengeksekusi segala jenis intent _Na
 
 ```json
 {
-    "bot_status": "online",
-    "last_sync": "2026-07-31 16:30:00",
-    "last_message": "Tolong catat pengeluaran makan 50k",
-    "webhook_status": "active",
-    "workflow_status": "listening",
-    "connection_status": "connected"
+    "success": true,
+    "intent": "telegram_status",
+    "resource": "telegram",
+    "status": "success",
+    "message": "Status Telegram berhasil diambil",
+    "data": {
+        "bot_status": "online",
+        "last_sync": "2026-08-05 00:00:00",
+        "last_message": "Tolong catat pengeluaran makan 50k",
+        "webhook_status": "active",
+        "workflow_status": "listening",
+        "connection_status": "connected"
+    }
 }
 ```
 
@@ -346,19 +356,25 @@ Alur kerja yang wajib ditaati untuk seluruh integrasi bot & Web:
 
 ### C. Standardisasi REST API
 
-Seluruh format pengiriman output harus menggunakan standar absolut:
+Seluruh format output menggunakan standar 6 field wajib:
 
 ```json
 // Berhasil
 {
     "success": true,
-    "message": "Success",
+    "intent": "create_transaction",
+    "resource": "transaction",
+    "status": "success",
+    "message": "Transaksi berhasil dicatat.",
     "data": { ... }
 }
 
 // Gagal Validasi HTTP 422
 {
     "success": false,
+    "intent": "create_transaction",
+    "resource": "transaction",
+    "status": "error",
     "message": "Validation Error",
     "errors": { ... }
 }

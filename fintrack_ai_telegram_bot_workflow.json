@@ -1,0 +1,757 @@
+{
+  "name": "FinTrack AI - Telegram Bot Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message", "callback_query", "edited_message"],
+        "additionalFields": {}
+      },
+      "id": "telegram-trigger",
+      "name": "📩 Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "fintrack-telegram-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_API_CREDENTIAL_ID",
+          "name": "FinTrack Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// NORMALIZE MESSAGE\n// Handles: text messages, callback_query,\n// edited_message, and extracts metadata.\n// ========================================\nconst body = $input.first().json;\n\nlet messageText = '';\nlet chatId = null;\nlet userId = null;\nlet username = '';\nlet firstName = '';\nlet messageId = null;\nlet updateType = 'message';\n\nif (body.message) {\n  updateType = 'message';\n  const msg = body.message;\n  messageText = msg.text || msg.caption || '';\n  chatId = msg.chat.id;\n  userId = msg.from?.id;\n  username = msg.from?.username || '';\n  firstName = msg.from?.first_name || 'User';\n  messageId = msg.message_id;\n} else if (body.callback_query) {\n  updateType = 'callback_query';\n  const cb = body.callback_query;\n  messageText = cb.data || '';\n  chatId = cb.message?.chat?.id;\n  userId = cb.from?.id;\n  username = cb.from?.username || '';\n  firstName = cb.from?.first_name || 'User';\n  messageId = cb.message?.message_id;\n} else if (body.edited_message) {\n  updateType = 'edited_message';\n  const emsg = body.edited_message;\n  messageText = emsg.text || emsg.caption || '';\n  chatId = emsg.chat.id;\n  userId = emsg.from?.id;\n  username = emsg.from?.username || '';\n  firstName = emsg.from?.first_name || 'User';\n  messageId = emsg.message_id;\n}\n\n// Guard: skip if message empty or bot message\nif (!messageText.trim() || !chatId) {\n  return [];\n}\n\n// Normalize text\nmessageText = messageText.trim();\n\nreturn [{\n  json: {\n    messageText,\n    chatId,\n    userId,\n    username,\n    firstName,\n    messageId,\n    updateType,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "normalize-message",
+      "name": "🔧 Normalize Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL}}/api/prompts",
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.LARAVEL_API_TOKEN}}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "qs": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "50"
+            }
+          ]
+        }
+      },
+      "id": "load-prompt",
+      "name": "📚 Load Prompt dari Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL}}/api/memories",
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.LARAVEL_API_TOKEN}}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "qs": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            }
+          ]
+        }
+      },
+      "id": "load-memory",
+      "name": "🧠 Load Memory dari Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 500],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combineBySingle",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "merge-context",
+      "name": "⚙️ Merge Context",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// BUILD AI REQUEST\n// Combines: prompt + memory + user message\n// Prepares payload for Groq LLM\n// ========================================\nconst items = $input.all();\n\n// Item 0: Normalized message (from before merge)\nconst msgData = (() => {\n  for (const item of items) {\n    if (item.json.messageText !== undefined) return item.json;\n  }\n  return {};\n})();\n\n// Item 1: Prompt response\nconst promptData = (() => {\n  for (const item of items) {\n    if (item.json.data && item.json.intent === 'list_prompts') return item.json.data;\n    if (item.json.data && Array.isArray(item.json.data)) return item.json.data;\n  }\n  return [];\n})();\n\n// Item 2: Memory response\nconst memoryData = (() => {\n  for (const item of items) {\n    if (item.json.data && item.json.intent === 'list_ai_memories') return item.json.data;\n    if (item.json.resource === 'ai_memory') return item.json.data || [];\n  }\n  return [];\n})();\n\n// Extract active system prompt\nconst prompts = Array.isArray(promptData) ? promptData : (promptData?.data || []);\nconst systemPromptObj = prompts.find(p => p.active && p.name === 'system') ||\n                        prompts.find(p => p.active) ||\n                        { prompt: '' };\n\nconst systemPrompt = systemPromptObj.prompt ||\n  `Kamu adalah FinTrack AI, asisten keuangan pribadi berbasis Telegram.\nTugasmu adalah membantu pengguna mencatat, menganalisis, dan mengelola keuangan mereka.\n\nPanggil user dengan nama mereka. Gunakan bahasa Indonesia yang ramah dan profesional.\n\nKamu WAJIB merespons HANYA dalam format JSON berikut:\n{\n  \"intent\": \"<nama_intent>\",\n  \"message\": \"<pesan_untuk_user>\",\n  \"parameters\": { <parameter_yang_diperlukan> }\n}\n\nDaftar intent yang tersedia:\n- create_transaction: catat transaksi (wajib: type, amount, category, description, transaction_date)\n- update_transaction: update transaksi (wajib: id; opsional: type, amount, category, description, transaction_date)\n- delete_transaction: hapus transaksi (wajib: id)\n- create_budget: buat budget (wajib: name, amount, period)\n- update_budget: update budget (wajib: id)\n- delete_budget: hapus budget (wajib: id)\n- budget: lihat ringkasan budget\n- balance: cek saldo\n- create_reminder: buat pengingat (wajib: title, remind_at)\n- list_reminders: lihat semua pengingat\n- create_bill: catat tagihan rutin (wajib: name, amount, billing_date)\n- list_bills: lihat tagihan\n- create_saving_goal: buat target tabungan (wajib: name, target_amount)\n- saving_progress: progres tabungan\n- list_categories: lihat kategori\n- create_category: buat kategori (wajib: name, type)\n- statistics: lihat statistik keuangan\n- daily_report: laporan harian (opsional: date)\n- weekly_report: laporan mingguan (opsional: start_date, end_date)\n- monthly_report: laporan bulanan (opsional: year, month)\n- ai_insight: analisis keuangan AI\n- ai_prediction: prediksi keuangan\n- ai_recommendation: rekomendasi keuangan\n- dashboard: ringkasan dashboard\n- greeting: sapa pengguna\n- help: tampilkan bantuan\n- unknown: pesan tidak dikenal`;\n\n// Build memory context string\nconst memories = Array.isArray(memoryData) ? memoryData : (memoryData?.data || []);\nconst activeMemories = memories.filter(m => m.active !== false);\nconst memoryContext = activeMemories.length > 0\n  ? '\\n\\nKonteks Memory User:\\n' + activeMemories.map(m => `- ${m.key}: ${m.value}`).join('\\n')\n  : '';\n\nreturn [{\n  json: {\n    // Pass through message data\n    ...msgData,\n    // AI Request payload\n    aiRequest: {\n      model: 'llama-3.3-70b-versatile',\n      messages: [\n        {\n          role: 'system',\n          content: systemPrompt + memoryContext\n        },\n        {\n          role: 'user',\n          content: `User: ${msgData.firstName || 'User'}\\nPesan: ${msgData.messageText}`\n        }\n      ],\n      temperature: 0.1,\n      max_tokens: 512,\n      response_format: { type: 'json_object' }\n    }\n  }\n}];"
+      },
+      "id": "build-ai-request",
+      "name": "🛠️ Build AI Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.aiRequest) }}",
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 2000
+          }
+        }
+      },
+      "id": "groq-intent-router",
+      "name": "🤖 Groq Intent Router",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GROQ_API_CREDENTIAL_ID",
+          "name": "Groq API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// PARSE GROQ RESPONSE\n// Extract intent + parameters + message\n// from Groq JSON response\n// ========================================\nconst item = $input.first().json;\nconst prevItem = $('🛠️ Build AI Request').first().json;\n\nlet intent = 'unknown';\nlet message = '';\nlet parameters = {};\nlet aiRawContent = '';\n\ntry {\n  aiRawContent = item.choices?.[0]?.message?.content || '{}';\n  const parsed = JSON.parse(aiRawContent);\n  intent = (parsed.intent || 'unknown').toLowerCase().trim();\n  message = parsed.message || '';\n  parameters = parsed.parameters || {};\n} catch (e) {\n  intent = 'unknown';\n  message = 'Maaf, saya tidak dapat memahami permintaan Anda. Coba ulangi dengan kalimat yang lebih jelas.';\n  parameters = {};\n}\n\n// Inject user context into parameters\nparameters._user_id = prevItem.userId;\nparameters._username = prevItem.username;\nparameters._chat_id = prevItem.chatId;\nparameters._first_name = prevItem.firstName;\n\n// Classify intent into groups for routing\nconst AI_MODULE_INTENTS = ['ai_insight', 'ai_prediction', 'ai_recommendation'];\nconst REPORT_INTENTS = ['daily_report', 'weekly_report', 'monthly_report', 'statistics'];\nconst SYSTEM_INTENTS = ['greeting', 'help', 'unknown', 'telegram_status', 'dashboard', 'dashboard_summary'];\n\nlet intentGroup = 'crud';\nif (AI_MODULE_INTENTS.includes(intent)) intentGroup = 'ai_module';\nelse if (REPORT_INTENTS.includes(intent)) intentGroup = 'report';\nelse if (SYSTEM_INTENTS.includes(intent)) intentGroup = 'system';\n\nreturn [{\n  json: {\n    ...prevItem,\n    intent,\n    intentGroup,\n    aiMessage: message,\n    parameters,\n    aiRawContent\n  }\n}];"
+      },
+      "id": "parse-groq-response",
+      "name": "🔍 Parse Groq Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputKey": "ai_module",
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [
+                  {
+                    "id": "ai-module-condition",
+                    "leftValue": "={{ $json.intentGroup }}",
+                    "rightValue": "ai_module",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "report",
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [
+                  {
+                    "id": "report-condition",
+                    "leftValue": "={{ $json.intentGroup }}",
+                    "rightValue": "report",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "system",
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+                "conditions": [
+                  {
+                    "id": "system-condition",
+                    "leftValue": "={{ $json.intentGroup }}",
+                    "rightValue": "system",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            }
+          ],
+          "fallbackOutput": "extra"
+        },
+        "options": {}
+      },
+      "id": "switch-intent-group",
+      "name": "🔀 Switch Intent Group",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [1780, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL}}/api/bot/execute",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.LARAVEL_API_TOKEN}}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{ $json.intent }}\",\n  \"parameters\": {{ JSON.stringify($json.parameters) }}\n}",
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000
+          }
+        }
+      },
+      "id": "execute-crud-intent",
+      "name": "⚡ Execute CRUD Intent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 600],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL}}/api/bot/execute",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.LARAVEL_API_TOKEN}}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{ $json.intent }}\",\n  \"parameters\": {{ JSON.stringify($json.parameters) }}\n}",
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000
+          }
+        }
+      },
+      "id": "execute-report-intent",
+      "name": "📊 Execute Report Intent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL}}/api/bot/execute",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.LARAVEL_API_TOKEN}}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{ $json.intent }}\",\n  \"parameters\": {{ JSON.stringify($json.parameters) }}\n}",
+        "options": {
+          "timeout": 10000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000
+          }
+        }
+      },
+      "id": "execute-system-intent",
+      "name": "🔧 Execute System Intent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL}}/api/combined-data",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.LARAVEL_API_TOKEN}}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 1000
+          }
+        }
+      },
+      "id": "fetch-ai-data",
+      "name": "📦 Fetch AI Combined Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 800],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Kamu adalah FinTrack AI, analis keuangan AI. Berikan {{ $('🔍 Parse Groq Response').first().json.intent === 'ai_insight' ? 'insight' : $('🔍 Parse Groq Response').first().json.intent === 'ai_prediction' ? 'prediksi' : 'rekomendasi' }} keuangan yang jelas dan actionable dalam bahasa Indonesia, berdasarkan data transaksi, budget, dan tabungan user. Ringkas dalam maksimal 5 poin. Gunakan format yang mudah dibaca di Telegram (gunakan emoji, bold dengan *teks*). JANGAN kembalikan JSON.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Data keuangan user:\\nTransaksi: {{ JSON.stringify($('📦 Fetch AI Combined Data').first().json.data?.transactions?.slice(0, 30) || []) }}\\nBudget: {{ JSON.stringify($('📦 Fetch AI Combined Data').first().json.data?.budgets || []) }}\\nTarget Tabungan: {{ JSON.stringify($('📦 Fetch AI Combined Data').first().json.data?.saving_goals || []) }}\\nTagihan: {{ JSON.stringify($('📦 Fetch AI Combined Data').first().json.data?.bills || []) }}\\n\\nPermintaan user: {{ $('🔍 Parse Groq Response').first().json.messageText }}\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 800\n}",
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetweenTries": 2000
+          }
+        }
+      },
+      "id": "ai-response-formatter",
+      "name": "✨ AI Response Formatter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 800],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GROQ_API_CREDENTIAL_ID",
+          "name": "Groq API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// FORMAT TELEGRAM RESPONSE\n// Converts Laravel API response into\n// user-friendly Telegram MarkdownV2 message\n// ========================================\nconst allItems = $input.all();\nconst item = allItems[0]?.json || {};\n\n// Get original parsed data from intent router step\nconst parsedCtx = $('🔍 Parse Groq Response').first().json;\nconst chatId = parsedCtx.chatId;\nconst intent = parsedCtx.intent;\nconst aiMessage = parsedCtx.aiMessage || '';\nconst firstName = parsedCtx.firstName || 'User';\n\n// Determine source of this item\nconst isGroqAiResponse = item.choices !== undefined;\nconst isLaravelResponse = item.success !== undefined;\n\nlet replyText = '';\n\nif (isGroqAiResponse) {\n  // AI Module response (insight/prediction/recommendation)\n  replyText = item.choices?.[0]?.message?.content || 'Maaf, tidak dapat menghasilkan analisis saat ini.';\n\n} else if (isLaravelResponse) {\n  const success = item.success;\n  const data = item.data;\n  const laravelMessage = item.message || '';\n  const laravelIntent = item.intent || intent;\n\n  if (!success) {\n    replyText = `❌ *Gagal memproses permintaan*\\n${laravelMessage || 'Terjadi kesalahan. Coba ulangi.'}`;\n  } else {\n    switch (laravelIntent) {\n      case 'create_transaction':\n        replyText = `✅ *Transaksi Dicatat*\\n💰 ${data?.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: Rp ${Number(data?.amount || 0).toLocaleString('id-ID')}\\n📁 Kategori: ${data?.category || '-'}\\n📝 ${data?.description || '-'}\\n📅 ${data?.transaction_date || '-'}`;\n        break;\n      case 'update_transaction':\n        replyText = `✅ *Transaksi Diperbarui*\\n💰 ${data?.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: Rp ${Number(data?.amount || 0).toLocaleString('id-ID')}\\n📁 Kategori: ${data?.category || '-'}\\n📝 ${data?.description || '-'}`;\n        break;\n      case 'delete_transaction':\n        replyText = `🗑️ Transaksi berhasil dihapus.`;\n        break;\n      case 'create_budget':\n        replyText = `✅ *Budget Dibuat*\\n📋 ${data?.name || '-'}\\n💵 Rp ${Number(data?.amount || 0).toLocaleString('id-ID')} / ${data?.period || '-'}`;\n        break;\n      case 'budget':\n      case 'balance':\n        if (Array.isArray(data)) {\n          const lines = data.map(b => `📊 ${b.name}: Rp ${Number(b.amount || 0).toLocaleString('id-ID')}`).join('\\n');\n          replyText = `💼 *Ringkasan Budget Anda*\\n${lines || 'Belum ada budget.'}`;\n        } else {\n          replyText = `💼 *Budget*\\n${laravelMessage}`;\n        }\n        break;\n      case 'create_reminder':\n        replyText = `⏰ *Pengingat Dibuat*\\n📌 ${data?.title || '-'}\\n🕐 ${data?.remind_at || '-'}`;\n        break;\n      case 'list_reminders':\n        if (Array.isArray(data) && data.length > 0) {\n          const lines = data.map((r, i) => `${i+1}. ⏰ ${r.title} — ${r.remind_at}`).join('\\n');\n          replyText = `📋 *Pengingat Anda*\\n${lines}`;\n        } else {\n          replyText = '📋 Tidak ada pengingat aktif.';\n        }\n        break;\n      case 'create_bill':\n        replyText = `✅ *Tagihan Dicatat*\\n🏷️ ${data?.name || '-'}\\n💵 Rp ${Number(data?.amount || 0).toLocaleString('id-ID')}\\n📅 Tanggal tagih: ${data?.billing_date || '-'}`;\n        break;\n      case 'list_bills':\n        if (Array.isArray(data) && data.length > 0) {\n          const lines = data.map((b, i) => `${i+1}. 🏷️ ${b.name}: Rp ${Number(b.amount||0).toLocaleString('id-ID')} (tgl ${b.billing_date})`).join('\\n');\n          replyText = `🧾 *Tagihan Rutin*\\n${lines}`;\n        } else {\n          replyText = '🧾 Tidak ada tagihan rutin.';\n        }\n        break;\n      case 'create_saving_goal':\n        replyText = `🎯 *Target Tabungan Dibuat*\\n📌 ${data?.name || '-'}\\n💰 Target: Rp ${Number(data?.target_amount || 0).toLocaleString('id-ID')}`;\n        break;\n      case 'saving_progress':\n        if (Array.isArray(data)) {\n          const lines = data.map(g => `🎯 ${g.name}\\n   Terkumpul: Rp ${Number(g.current_amount||0).toLocaleString('id-ID')} / Rp ${Number(g.target_amount||0).toLocaleString('id-ID')}`).join('\\n');\n          replyText = `📈 *Progres Tabungan*\\n${lines}`;\n        } else {\n          replyText = laravelMessage || 'Lihat progres tabungan Anda di dashboard.';\n        }\n        break;\n      case 'statistics':\n        replyText = `📊 *Statistik Keuangan*\\n${aiMessage || laravelMessage || 'Data statistik berhasil diambil. Buka dashboard untuk melihat detail.'}`;\n        break;\n      case 'daily_report':\n      case 'weekly_report':\n      case 'monthly_report': {\n        const report = data?.report || data || {};\n        const period = laravelIntent === 'daily_report' ? 'Harian' : laravelIntent === 'weekly_report' ? 'Mingguan' : 'Bulanan';\n        const income = report.total_income || report.income || 0;\n        const expense = report.total_expense || report.expense || 0;\n        const net = Number(income) - Number(expense);\n        replyText = `📅 *Laporan ${period}*\\n💚 Pemasukan: Rp ${Number(income).toLocaleString('id-ID')}\\n🔴 Pengeluaran: Rp ${Number(expense).toLocaleString('id-ID')}\\n📊 Selisih: Rp ${net.toLocaleString('id-ID')}`;\n        break;\n      }\n      case 'list_categories':\n        if (Array.isArray(data) && data.length > 0) {\n          const incomes = data.filter(c => c.type === 'income').map(c => c.name).join(', ');\n          const expenses = data.filter(c => c.type === 'expense').map(c => c.name).join(', ');\n          replyText = `📂 *Kategori*\\n💚 Pemasukan: ${incomes || '-'}\\n🔴 Pengeluaran: ${expenses || '-'}`;\n        } else {\n          replyText = '📂 Belum ada kategori.';\n        }\n        break;\n      case 'create_category':\n        replyText = `✅ *Kategori Dibuat*\\n📁 ${data?.name || '-'} (${data?.type || '-'})`;\n        break;\n      case 'greeting':\n        replyText = `👋 Halo, *${firstName}*!\\n\\n${laravelMessage || 'Saya FinTrack AI, asisten keuangan pribadi Anda. Ada yang bisa saya bantu?'}\\n\\nKetik /help untuk melihat yang bisa saya lakukan.`;\n        break;\n      case 'help':\n        replyText = `🤖 *FinTrack AI - Panduan Penggunaan*\\n\\n*Transaksi*\\n• \"catat pengeluaran makan 25rb\"\\n• \"tambah pemasukan gaji 5jt\"\\n\\n*Budget*\\n• \"buat budget makan 1jt/bulan\"\\n• \"cek budget saya\"\\n\\n*Laporan*\\n• \"laporan hari ini\"\\n• \"laporan minggu ini\"\\n• \"laporan bulan ini\"\\n\\n*Tabungan*\\n• \"buat target tabungan liburan 5jt\"\\n• \"progres tabungan saya\"\\n\\n*Pengingat*\\n• \"ingatkan saya bayar listrik tiap tgl 5\"\\n\\n*AI Analysis*\\n• \"analisis keuangan saya\"\\n• \"prediksi pengeluaran bulan depan\"\\n• \"rekomendasi hemat\"`;\n        break;\n      case 'dashboard':\n      case 'dashboard_summary':\n        replyText = `📊 *Dashboard FinTrack AI*\\n\\n${laravelMessage || 'Buka dashboard untuk melihat ringkasan keuangan lengkap Anda.'}\\n\\n${aiMessage || ''}`;\n        break;\n      case 'unknown':\n      default:\n        replyText = `🤔 ${aiMessage || 'Maaf, saya tidak mengerti permintaan Anda. Ketik /help untuk melihat panduan penggunaan.'}`;\n        break;\n    }\n  }\n\n} else {\n  // Fallback\n  replyText = `🤔 ${aiMessage || 'Maaf, terjadi kesalahan. Coba ulangi permintaan Anda.'}`;\n}\n\n// Safety: sanitize special Markdown chars if needed\n// (Using Markdown mode 'Markdown' not MarkdownV2 for simpler escaping)\nreturn [{\n  json: {\n    chatId,\n    replyText,\n    intent,\n    parseMode: 'Markdown'\n  }\n}];"
+      },
+      "id": "format-response",
+      "name": "📝 Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 400]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.replyText }}",
+        "additionalFields": {
+          "parse_mode": "={{ $json.parseMode }}",
+          "disable_notification": false
+        }
+      },
+      "id": "telegram-send-message",
+      "name": "📤 Telegram Send Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2660, 400],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_API_CREDENTIAL_ID",
+          "name": "FinTrack Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "error-trigger",
+      "name": "🚨 Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [240, 700]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// ERROR HANDLER\n// Send error notification to Telegram\n// ========================================\nconst error = $input.first().json;\nconst executionId = $execution?.id || 'unknown';\nconst workflowName = $workflow?.name || 'FinTrack AI Bot';\n\nconst errorMessage = error.error?.message || error.message || JSON.stringify(error);\nconst nodeName = error.execution?.lastNodeExecuted || 'unknown node';\n\n// Try to get chatId from the failed execution context\nconst chatId = $env.TELEGRAM_ADMIN_CHAT_ID || error.execution?.data?.resultData?.runData?.['🔧 Normalize Message']?.[0]?.data?.main?.[0]?.[0]?.json?.chatId;\n\nreturn [{\n  json: {\n    chatId: chatId || $env.TELEGRAM_ADMIN_CHAT_ID,\n    errorMessage,\n    nodeName,\n    executionId,\n    workflowName\n  }\n}];"
+      },
+      "id": "prepare-error-message",
+      "name": "⚙️ Prepare Error Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "🔴 *FinTrack AI - Error*\n\n❗ Terjadi kesalahan pada sistem.\n\n```\nNode: {{ $json.nodeName }}\nError: {{ $json.errorMessage }}\nExecution: {{ $json.executionId }}\n```\n\nSilakan coba beberapa saat lagi atau hubungi administrator.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-send-error",
+      "name": "🚨 Telegram Send Error",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [680, 700],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_API_CREDENTIAL_ID",
+          "name": "FinTrack Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "📩 Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "🔧 Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Normalize Message": {
+      "main": [
+        [
+          {
+            "node": "📚 Load Prompt dari Laravel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🧠 Load Memory dari Laravel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📚 Load Prompt dari Laravel": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Merge Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Load Memory dari Laravel": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Merge Context",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "⚙️ Merge Context": {
+      "main": [
+        [
+          {
+            "node": "🛠️ Build AI Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🛠️ Build AI Request": {
+      "main": [
+        [
+          {
+            "node": "🤖 Groq Intent Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 Groq Intent Router": {
+      "main": [
+        [
+          {
+            "node": "🔍 Parse Groq Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Parse Groq Response": {
+      "main": [
+        [
+          {
+            "node": "🔀 Switch Intent Group",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Switch Intent Group": {
+      "main": [
+        [
+          {
+            "node": "🔧 Execute System Intent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📊 Execute Report Intent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📦 Fetch AI Combined Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⚡ Execute CRUD Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Execute System Intent": {
+      "main": [
+        [
+          {
+            "node": "📝 Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Execute Report Intent": {
+      "main": [
+        [
+          {
+            "node": "📝 Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚡ Execute CRUD Intent": {
+      "main": [
+        [
+          {
+            "node": "📝 Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Fetch AI Combined Data": {
+      "main": [
+        [
+          {
+            "node": "✨ AI Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✨ AI Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "📝 Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Format Response": {
+      "main": [
+        [
+          {
+            "node": "📤 Telegram Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚨 Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Prepare Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Prepare Error Message": {
+      "main": [
+        [
+          {
+            "node": "🚨 Telegram Send Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": true
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2026-08-05T00:00:00.000Z",
+      "updatedAt": "2026-08-05T00:00:00.000Z",
+      "id": "1",
+      "name": "FinTrack AI"
+    },
+    {
+      "createdAt": "2026-08-05T00:00:00.000Z",
+      "updatedAt": "2026-08-05T00:00:00.000Z",
+      "id": "2",
+      "name": "Telegram Bot"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-08-05T00:00:00.000Z",
+  "versionId": "1"
+}

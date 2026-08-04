@@ -1,59 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌟 FinTrack AI — Personal Finance Operating System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**FinTrack AI** adalah sistem manajemen keuangan pribadi berbasis AI yang mengintegrasikan **Laravel 12**, **n8n**, **Groq AI**, dan **Telegram Bot** dalam satu ekosistem terpadu.
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat&logo=php)](https://php.net)
+[![n8n](https://img.shields.io/badge/n8n-Workflow-EA4B71?style=flat)](https://n8n.io)
+[![Groq](https://img.shields.io/badge/Groq-LLaMA_3.3-F55036?style=flat)](https://groq.com)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📐 Arsitektur Sistem
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Telegram   │ ──► │     n8n      │ ──► │  Groq AI     │ ──► │   Laravel    │
+│  (Chat UI)   │ ◄── │  (Workflow)  │ ◄── │ (LLaMA 3.3)  │ ◄── │(Control Ctr) │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+```
 
-## Learning Laravel
+| Komponen | Peran |
+|----------|-------|
+| **Laravel 12** | Control Center, REST API, Business Logic, Database, Web UI |
+| **n8n** | Orchestration Layer, Workflow Engine, Scheduler |
+| **Groq AI** | NLP Intent Extraction, Response Generation |
+| **Telegram** | Antarmuka percakapan natural language |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📁 Struktur Dokumentasi
 
-## Laravel Sponsors
+| File | Deskripsi |
+|------|-----------|
+| [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) | Dokumentasi lengkap REST API & semua endpoint |
+| [`CONTROL_CENTER_DOCS.md`](CONTROL_CENTER_DOCS.md) | Dokumentasi Control Center, arsitektur, & modul |
+| [`API_ROUTES_DOCS.md`](API_ROUTES_DOCS.md) | Ringkasan routes web & API |
+| [`N8N_WORKFLOW_DOCS.md`](N8N_WORKFLOW_DOCS.md) | **Dokumentasi n8n Telegram Bot Workflow** |
+| [`fintrack_ai_telegram_bot_workflow.json`](fintrack_ai_telegram_bot_workflow.json) | File workflow n8n siap import |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🚀 Quick Start
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
 
-## Contributing
+- PHP 8.2+, Composer, MySQL
+- Node.js (untuk Vite assets)
+- n8n (cloud/self-hosted)
+- Groq API Key
+- Telegram Bot Token
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Installation
 
-## Code of Conduct
+```bash
+# 1. Clone & install dependencies
+git clone <repo-url> fintrack-ai
+cd fintrack-ai
+composer install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 2. Environment setup
+cp .env.example .env
+php artisan key:generate
 
-## Security Vulnerabilities
+# 3. Database
+php artisan migrate --seed
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 4. Assets (development)
+npm install && npm run dev
 
-## License
+# 5. Run server
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Konfigurasi `.env` Penting
+
+```env
+APP_NAME="FinTrack AI"
+APP_URL=https://your-domain.com
+
+DB_CONNECTION=mysql
+DB_DATABASE=fintrack_ai
+
+# n8n Integration
+N8N_WEBHOOK_URL=https://n8n.your-domain.com/webhook/fintrack
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+GROQ_API_KEY=gsk_...
+```
+
+---
+
+## 🏗️ Stack Teknologi
+
+| Layer | Teknologi |
+|-------|-----------|
+| Framework | Laravel 12 |
+| Database | MySQL 8.x |
+| Frontend | Blade, Tailwind CSS (CDN), Alpine.js (CDN), Chart.js |
+| AI Model | Groq — LLaMA 3.3 70B Versatile |
+| Workflow | n8n (self-hosted/cloud) |
+| Bot | Telegram Bot API |
+| Pattern | Clean Architecture, Repository Pattern, Service Layer |
+
+---
+
+## 📡 API Overview
+
+Base URL: `https://your-domain.com/api`
+
+| Resource | Endpoint |
+|----------|----------|
+| Bot Execute (n8n webhook) | `POST /api/bot/execute` |
+| Transactions | `GET\|POST\|PUT\|DELETE /api/transactions` |
+| Categories | `GET\|POST\|PUT\|DELETE /api/categories` |
+| Budgets | `GET\|POST\|PUT\|DELETE /api/budgets` |
+| Reminders | `GET\|POST\|PUT\|DELETE /api/reminders` |
+| Bills | `GET\|POST\|PUT\|DELETE /api/bills` |
+| Saving Goals | `GET\|POST\|PUT\|DELETE /api/saving-goals` |
+| Reports | `GET /api/report/daily\|weekly\|monthly` |
+| Dashboard | `GET /api/dashboard` |
+| Statistics | `GET /api/statistics` |
+| AI Memories | `GET\|POST /api/memories` |
+| Prompts | `GET\|POST /api/prompts` |
+| Combined Data | `GET /api/combined-data` |
+
+**Format Response Standar:**
+```json
+{
+    "success": true,
+    "intent": "create_transaction",
+    "resource": "transaction",
+    "status": "success",
+    "message": "Transaksi berhasil dicatat.",
+    "data": { ... }
+}
+```
+
+Lihat [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) untuk dokumentasi lengkap.
+
+---
+
+## 🤖 Telegram Bot
+
+Bot mendukung 38+ intent dalam 8 modul:
+
+| Modul | Contoh Perintah |
+|-------|----------------|
+| Transaksi | "catat pengeluaran makan 25rb" |
+| Laporan | "laporan bulan ini", "laporan hari ini" |
+| Budget | "buat budget makan 1jt per bulan" |
+| Pengingat | "ingatkan saya bayar listrik tgl 5" |
+| Tabungan | "buat target liburan 5jt" |
+| AI Insight | "analisis keuangan saya" |
+| Prediksi | "prediksi pengeluaran bulan depan" |
+| Rekomendasi | "tips hemat untuk saya" |
+
+Import `fintrack_ai_telegram_bot_workflow.json` ke n8n untuk memulai.
+Lihat [`N8N_WORKFLOW_DOCS.md`](N8N_WORKFLOW_DOCS.md) untuk panduan setup lengkap.
+
+---
+
+## 🔐 Lisensi
+
+FinTrack AI — Personal Finance Operating System.
+Dibangun dengan ❤️ menggunakan Laravel 12.

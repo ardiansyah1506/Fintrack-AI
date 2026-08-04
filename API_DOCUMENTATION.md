@@ -4,6 +4,8 @@ Selamat datang di Dokumentasi Resmi REST API **FinTrack AI Personal Finance Oper
 
 Aplikasi ini berarsitektur **Clean Architecture** berbasis Laravel 12 yang berfungsi sebagai **Control Center**, **Data Center**, dan **Single Source of Truth** untuk seluruh transaksi keuangan, pengingat, tagihan rutin, serta modul kecerdasan buatan (AI Center).
 
+> 📄 Untuk dokumentasi n8n Telegram Bot Workflow, lihat [`N8N_WORKFLOW_DOCS.md`](N8N_WORKFLOW_DOCS.md)
+
 ---
 
 ## 📑 Daftar Isi
@@ -33,7 +35,7 @@ Aplikasi ini berarsitektur **Clean Architecture** berbasis Laravel 12 yang berfu
    - [Chat History](#g-chat-history)
    - [Prompt Manager](#h-prompt-manager)
    - [AI Logs](#i-ai-logs)
-10. [Panduan Integrasi n8n & Gemini](#10-panduan-integrasi-n8n--gemini)
+10. [Panduan Integrasi n8n & Groq AI](#10-panduan-integrasi-n8n--groq-ai)
 
 ---
 
@@ -55,31 +57,42 @@ Aplikasi ini berarsitektur **Clean Architecture** berbasis Laravel 12 yang berfu
 
 ## 2. Format Respons Standar
 
-Seluruh endpoint REST API FinTrack AI mengembalikan format JSON baku:
+Seluruh endpoint REST API FinTrack AI mengembalikan format JSON baku dengan **6 field wajib**:
 
 ### A. Respon Berhasil (HTTP 200 / 201)
 ```json
 {
     "success": true,
-    "message": "Pesan deskriptif keberhasilan",
+    "intent": "create_transaction",
+    "resource": "transaction",
+    "status": "success",
+    "message": "Transaksi berhasil dicatat.",
     "data": {
         // Object atau Array hasil query
     }
 }
 ```
 
+| Field | Tipe | Deskripsi |
+|-------|------|-----------|
+| `success` | `boolean` | Status eksekusi: `true` / `false` |
+| `intent` | `string` | Nama intent yang dieksekusi (e.g. `create_transaction`) |
+| `resource` | `string` | Jenis resource utama (e.g. `transaction`) |
+| `status` | `string` | Nilai: `success` \| `error` |
+| `message` | `string` | Pesan deskriptif singkat |
+| `data` | `object\|array\|null` | Payload data hasil operasi |
+
 ### B. Respon Gagal Validasi (HTTP 422)
 ```json
 {
     "success": false,
+    "intent": "create_transaction",
+    "resource": "transaction",
+    "status": "error",
     "message": "Validation Error",
     "errors": {
-        "amount": [
-            "The amount field is required."
-        ],
-        "category": [
-            "The category field is required."
-        ]
+        "amount": ["The amount field is required."],
+        "category": ["The category field is required."]
     }
 }
 ```
@@ -88,7 +101,11 @@ Seluruh endpoint REST API FinTrack AI mengembalikan format JSON baku:
 ```json
 {
     "success": false,
-    "message": "Penyebab kesalahan atau data tidak ditemukan"
+    "intent": "",
+    "resource": "",
+    "status": "error",
+    "message": "Penyebab kesalahan atau data tidak ditemukan",
+    "data": null
 }
 ```
 
@@ -420,19 +437,76 @@ Seluruh 8 modul AI Center memiliki endpoint REST API penuh yang memfasilitasi pe
 
 ---
 
-## 10. Panduan Integrasi n8n & Gemini
+## 10. Panduan Integrasi n8n & Groq AI
 
-### Langkah-langkah Integrasi Webhook Bot:
-1. **Telegram Webhook**: Pengguna mengirim pesan via Telegram → Diterima oleh Trigger Node n8n.
-2. **Gemini Intent Extraction**: Node n8n memanggil Gemini API dengan Prompt dari endpoint `GET /api/prompts` untuk menghasilkan skema JSON intent.
-3. **Laravel Dispatcher Execution**: Node HTTP Request n8n melakukan HTTP `POST` ke `http://your-domain.com/api/bot/execute` membawa payload:
-   ```json
-   {
-       "intent": "...",
-       "parameters": { ... }
-   }
-   ```
-4. **Respon ke Telegram**: n8n menerima respons `{ "success": true, "data": { ... } }` dan memformatnya menjadi pesan jawaban balikan ke Telegram user.
+FinTrack AI menggunakan **satu workflow n8n terpadu** sebagai orchestration layer. File workflow tersedia di `fintrack_ai_telegram_bot_workflow.json`.
+
+### Alur Integrasi
+
+```
+Telegram → n8n Trigger
+         → Normalize Message
+         → [Parallel] Load Prompt (GET /api/prompts)
+                      Load Memory (GET /api/memories)
+         → Build AI Request (inject prompt + memory)
+         → Groq API (llama-3.3-70b, JSON mode)
+         → Parse Intent + Parameters
+         → Switch Group (crud/report/system/ai_module)
+         → POST /api/bot/execute
+         → Format Response
+         → Telegram Send Message
+```
+
+### Endpoint yang Digunakan Workflow n8n
+
+| Method | Endpoint | Fungsi |
+|--------|----------|--------|
+| `POST` | `/api/bot/execute` | Eksekusi intent dari Groq AI |
+| `GET` | `/api/prompts?per_page=50` | Load system prompt aktif |
+| `GET` | `/api/memories?per_page=100` | Load konteks memori AI |
+| `GET` | `/api/combined-data` | Load semua data untuk analisis AI Module |
+
+### Format Request ke `/api/bot/execute`
+
+```json
+{
+    "intent": "create_transaction",
+    "parameters": {
+        "type": "expense",
+        "amount": 75000,
+        "category": "Makanan",
+        "description": "Makan siang",
+        "transaction_date": "2026-08-05"
+    }
+}
+```
+
+### Format Response dari `/api/bot/execute`
+
+```json
+{
+    "success": true,
+    "intent": "create_transaction",
+    "resource": "transaction",
+    "status": "success",
+    "message": "Transaksi berhasil dicatat oleh Bot",
+    "data": {
+        "id": 42,
+        "type": "expense",
+        "amount": 75000,
+        "category": "Makanan",
+        "transaction_date": "2026-08-05"
+    }
+}
+```
+
+### Setup Workflow n8n
+
+Lihat [`N8N_WORKFLOW_DOCS.md`](N8N_WORKFLOW_DOCS.md) untuk panduan setup lengkap, termasuk:
+- Environment variables yang diperlukan
+- Konfigurasi credentials Telegram & Groq
+- Cara import workflow JSON
+- Penjelasan per node
 
 ---
-*Dokumentasi ini dibuat secara otomatis dan dikurasi sesuai standar Laravel 12 Enterprise Clean Architecture FinTrack AI OS.*
+*Dokumentasi ini dibuat dan dikurasi sesuai standar Laravel 12 Enterprise Clean Architecture FinTrack AI OS.*
