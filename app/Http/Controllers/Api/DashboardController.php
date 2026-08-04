@@ -31,7 +31,8 @@ class DashboardController extends Controller
             $data,
             'Berhasil mengambil data dashboard',
             200,
-            'dashboard_summary'
+            'dashboard_summary',
+            'dashboard'
         );
     }
 
@@ -46,7 +47,8 @@ class DashboardController extends Controller
             $data,
             'Data AI Summary Berhasil',
             200,
-            'ai_summary'
+            'ai_summary',
+            'dashboard'
         );
     }
 }

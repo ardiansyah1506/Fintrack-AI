@@ -24,7 +24,7 @@ class ReportController extends Controller
         $date = $request->query('date', Carbon::now()->format('Y-m-d'));
         $report = $this->reportService->getDailyReport($date);
 
-        return $this->successResponse($report, 'Berhasil mengambil laporan harian');
+        return $this->successResponse($report, 'Berhasil mengambil laporan harian', 200, 'daily_report', 'report');
     }
 
     /**
@@ -38,7 +38,7 @@ class ReportController extends Controller
 
         $report = $this->reportService->getWeeklyReport($startDate, $endDate);
 
-        return $this->successResponse($report, 'Berhasil mengambil laporan mingguan');
+        return $this->successResponse($report, 'Berhasil mengambil laporan mingguan', 200, 'weekly_report', 'report');
     }
 
     /**
@@ -52,6 +52,7 @@ class ReportController extends Controller
 
         $report = $this->reportService->getMonthlyReport($year, $month);
 
-        return $this->successResponse($report, 'Berhasil mengambil laporan bulanan');
+        return $this->successResponse($report, 'Berhasil mengambil laporan bulanan', 200, 'monthly_report', 'report');
     }
 }
+

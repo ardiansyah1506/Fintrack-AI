@@ -29,7 +29,8 @@ class CategoryController extends Controller
             CategoryResource::collection($categories),
             'Berhasil mengambil data kategori',
             200,
-            'category_list'
+            'list_categories',
+            'categories'
         );
     }
 
@@ -44,7 +45,8 @@ class CategoryController extends Controller
             new CategoryResource($category),
             'Kategori berhasil dibuat',
             201,
-            'category_create'
+            'create_category',
+            'category'
         );
     }
 
@@ -59,7 +61,8 @@ class CategoryController extends Controller
             new CategoryResource($category),
             'Berhasil mengambil detail kategori',
             200,
-            'category_detail'
+            'get_category',
+            'category'
         );
     }
 
@@ -74,7 +77,8 @@ class CategoryController extends Controller
             new CategoryResource($category),
             'Kategori berhasil diperbarui',
             200,
-            'category_update'
+            'update_category',
+            'category'
         );
     }
 
@@ -89,7 +93,8 @@ class CategoryController extends Controller
             null,
             'Kategori berhasil dihapus',
             200,
-            'category_delete'
+            'delete_category',
+            'category'
         );
     }
 }

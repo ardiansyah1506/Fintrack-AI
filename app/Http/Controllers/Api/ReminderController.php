@@ -1,37 +1,83 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\ReminderRequest;
-use App\Services\ReminderService;
 use App\Http\Resources\ReminderResource;
+use App\Services\ReminderService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class ReminderController extends Controller
 {
-    protected $service;
-    public function __construct(ReminderService $service) { $this->service = $service; }
+    use ApiResponse;
 
-    public function index(Request $request) {
+    public function __construct(protected ReminderService $service) {}
+
+    public function index(Request $request)
+    {
         $filters = $request->only('search');
-        return ReminderResource::collection($this->service->getAll($filters, 10));
+        $data = $this->service->getAll($filters, 10);
+
+        return $this->successResponse(
+            ReminderResource::collection($data),
+            'Berhasil mengambil data pengingat',
+            200,
+            'list_reminders',
+            'reminders'
+        );
     }
 
-    public function store(ReminderRequest $request) {
+    public function store(ReminderRequest $request)
+    {
         $data = $this->service->create($request->validated());
-        return new ReminderResource($data);
+
+        return $this->successResponse(
+            new ReminderResource($data),
+            'Pengingat berhasil dibuat',
+            201,
+            'create_reminder',
+            'reminder'
+        );
     }
 
-    public function show($id) {
-        return new ReminderResource($this->service->repository->find($id));
+    public function show($id)
+    {
+        $data = $this->service->repository->find($id);
+
+        return $this->successResponse(
+            new ReminderResource($data),
+            'Berhasil mengambil detail pengingat',
+            200,
+            'get_reminder',
+            'reminder'
+        );
     }
 
-    public function update(ReminderRequest $request, $id) {
+    public function update(ReminderRequest $request, $id)
+    {
         $data = $this->service->update($id, $request->validated());
-        return new ReminderResource($data);
+
+        return $this->successResponse(
+            new ReminderResource($data),
+            'Pengingat berhasil diperbarui',
+            200,
+            'update_reminder',
+            'reminder'
+        );
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $this->service->delete($id);
-        return response()->json(['message' => 'Deleted completely']);
+
+        return $this->successResponse(
+            null,
+            'Pengingat berhasil dihapus',
+            200,
+            'delete_reminder',
+            'reminder'
+        );
     }
 }

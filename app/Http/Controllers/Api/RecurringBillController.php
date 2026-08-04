@@ -1,37 +1,83 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\RecurringBillRequest;
-use App\Services\RecurringBillService;
 use App\Http\Resources\RecurringBillResource;
+use App\Services\RecurringBillService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class RecurringBillController extends Controller
 {
-    protected $service;
-    public function __construct(RecurringBillService $service) { $this->service = $service; }
+    use ApiResponse;
 
-    public function index(Request $request) {
+    public function __construct(protected RecurringBillService $service) {}
+
+    public function index(Request $request)
+    {
         $filters = $request->only('search');
-        return RecurringBillResource::collection($this->service->getAll($filters, 10));
+        $data = $this->service->getAll($filters, 10);
+
+        return $this->successResponse(
+            RecurringBillResource::collection($data),
+            'Berhasil mengambil data tagihan',
+            200,
+            'list_bills',
+            'bills'
+        );
     }
 
-    public function store(RecurringBillRequest $request) {
+    public function store(RecurringBillRequest $request)
+    {
         $data = $this->service->create($request->validated());
-        return new RecurringBillResource($data);
+
+        return $this->successResponse(
+            new RecurringBillResource($data),
+            'Tagihan berhasil dibuat',
+            201,
+            'create_bill',
+            'bill'
+        );
     }
 
-    public function show($id) {
-        return new RecurringBillResource($this->service->repository->find($id));
+    public function show($id)
+    {
+        $data = $this->service->repository->find($id);
+
+        return $this->successResponse(
+            new RecurringBillResource($data),
+            'Berhasil mengambil detail tagihan',
+            200,
+            'get_bill',
+            'bill'
+        );
     }
 
-    public function update(RecurringBillRequest $request, $id) {
+    public function update(RecurringBillRequest $request, $id)
+    {
         $data = $this->service->update($id, $request->validated());
-        return new RecurringBillResource($data);
+
+        return $this->successResponse(
+            new RecurringBillResource($data),
+            'Tagihan berhasil diperbarui',
+            200,
+            'update_bill',
+            'bill'
+        );
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $this->service->delete($id);
-        return response()->json(['message' => 'Deleted completely']);
+
+        return $this->successResponse(
+            null,
+            'Tagihan berhasil dihapus',
+            200,
+            'delete_bill',
+            'bill'
+        );
     }
 }

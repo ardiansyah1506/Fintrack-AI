@@ -28,7 +28,10 @@ class StatisticController extends Controller
 
         return $this->successResponse(
             $data,
-            'Berhasil mengambil statistik keuangan'
+            'Berhasil mengambil statistik keuangan',
+            200,
+            'statistics',
+            'statistics'
         );
     }
 }

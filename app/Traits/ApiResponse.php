@@ -8,36 +8,53 @@ trait ApiResponse
 {
     /**
      * Build standard JSON success response
+     *
+     * @param  mixed   $data
+     * @param  string  $message
+     * @param  int     $code
+     * @param  string  $intent   Intent name (e.g. create_transaction)
+     * @param  string  $resource Resource name (e.g. transaction)
      */
-    protected function successResponse($data = [], string $message = 'Success', int $code = 200, ?string $intent = null): JsonResponse
-    {
-        $response = [
-            'success' => true,
-            'message' => $message,
-            'data'    => $data
-        ];
-
-        if ($intent !== null) {
-            $response['intent'] = $intent;
-        }
-
-        return response()->json($response, $code);
+    protected function successResponse(
+        $data = null,
+        string $message = 'Success',
+        int $code = 200,
+        string $intent = '',
+        string $resource = ''
+    ): JsonResponse {
+        return response()->json([
+            'success'  => true,
+            'intent'   => $intent,
+            'resource' => $resource,
+            'status'   => 'success',
+            'message'  => $message,
+            'data'     => $data,
+        ], $code);
     }
 
     /**
      * Build standard JSON error response
+     *
+     * @param  string  $message
+     * @param  int     $code
+     * @param  mixed   $errors
+     * @param  string  $intent
+     * @param  string  $resource
      */
-    protected function errorResponse(string $message = 'Error', int $code = 400, $errors = []): JsonResponse
-    {
-        $response = [
-            'success' => false,
-            'message' => $message,
-        ];
-
-        if (!empty($errors)) {
-            $response['errors'] = $errors;
-        }
-
-        return response()->json($response, $code);
+    protected function errorResponse(
+        string $message = 'Error',
+        int $code = 400,
+        $errors = null,
+        string $intent = '',
+        string $resource = ''
+    ): JsonResponse {
+        return response()->json([
+            'success'  => false,
+            'intent'   => $intent,
+            'resource' => $resource,
+            'status'   => 'error',
+            'message'  => $message,
+            'errors'   => $errors,
+        ], $code);
     }
 }

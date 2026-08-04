@@ -39,15 +39,15 @@ class TransactionController extends Controller
         $summary = $this->transactionService->getFilteredSummary($filters);
 
         return $this->successResponse([
-            'summary' => $summary,
-            'items' => TransactionResource::collection($transactions),
+            'summary'    => $summary,
+            'items'      => TransactionResource::collection($transactions),
             'pagination' => [
-                'total' => $transactions->total(),
-                'per_page' => $transactions->perPage(),
+                'total'        => $transactions->total(),
+                'per_page'     => $transactions->perPage(),
                 'current_page' => $transactions->currentPage(),
-                'last_page' => $transactions->lastPage(),
-            ]
-        ], 'Berhasil mengambil data transaksi');
+                'last_page'    => $transactions->lastPage(),
+            ],
+        ], 'Berhasil mengambil data transaksi', 200, 'list_transactions', 'transactions');
     }
 
     /**
@@ -60,7 +60,9 @@ class TransactionController extends Controller
         return $this->successResponse(
             new TransactionResource($transaction),
             'Transaksi berhasil dicatat',
-            201
+            201,
+            'create_transaction',
+            'transaction'
         );
     }
 
@@ -73,7 +75,10 @@ class TransactionController extends Controller
 
         return $this->successResponse(
             new TransactionResource($transaction),
-            'Berhasil mengambil detail transaksi'
+            'Berhasil mengambil detail transaksi',
+            200,
+            'get_transaction',
+            'transaction'
         );
     }
 
@@ -86,7 +91,10 @@ class TransactionController extends Controller
 
         return $this->successResponse(
             new TransactionResource($transaction),
-            'Transaksi berhasil diperbarui'
+            'Transaksi berhasil diperbarui',
+            200,
+            'update_transaction',
+            'transaction'
         );
     }
 
@@ -99,7 +107,10 @@ class TransactionController extends Controller
 
         return $this->successResponse(
             null,
-            'Transaksi berhasil dihapus'
+            'Transaksi berhasil dihapus',
+            200,
+            'delete_transaction',
+            'transaction'
         );
     }
 }

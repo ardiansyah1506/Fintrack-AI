@@ -28,7 +28,10 @@ class CombinedDataController extends Controller
 
         return $this->successResponse(
             $data,
-            'Berhasil mengambil semua data'
+            'Berhasil mengambil semua data',
+            200,
+            'combined_data',
+            'data'
         );
     }
 }

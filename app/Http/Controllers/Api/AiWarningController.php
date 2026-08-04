@@ -1,15 +1,76 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\AiWarningRequest;
-use App\Services\AiWarningService;
 use App\Http\Resources\AiWarningResource;
-class AiWarningController extends Controller {
+use App\Services\AiWarningService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+
+class AiWarningController extends Controller
+{
+    use ApiResponse;
+
     public function __construct(protected AiWarningService $service) {}
-    public function index(Request $request) { return AiWarningResource::collection($this->service->getAll($request->only('search'), 10)); }
-    public function store(AiWarningRequest $request) { return new AiWarningResource($this->service->create($request->validated())); }
-    public function show($id) { return new AiWarningResource(app(\App\Contracts\Repositories\AiWarningRepositoryInterface::class)->find($id)); }
-    public function update(AiWarningRequest $request, $id) { return new AiWarningResource($this->service->update($id, $request->validated())); }
-    public function destroy($id) { $this->service->delete($id); return response()->json(['message' => 'Deleted']); }
+
+    public function index(Request $request)
+    {
+        $data = $this->service->getAll($request->only('search'), 10);
+
+        return $this->successResponse(
+            AiWarningResource::collection($data),
+            'Berhasil mengambil data peringatan',
+            200,
+            'list_ai_warnings',
+            'ai_warning'
+        );
+    }
+
+    public function store(AiWarningRequest $request)
+    {
+        $data = $this->service->create($request->validated());
+
+        return $this->successResponse(
+            new AiWarningResource($data),
+            'AI Warning berhasil dibuat',
+            201,
+            'create_ai_warning',
+            'ai_warning'
+        );
+    }
+
+    public function show($id)
+    {
+        $data = app(\App\Contracts\Repositories\AiWarningRepositoryInterface::class)->find($id);
+
+        return $this->successResponse(
+            new AiWarningResource($data),
+            'Berhasil mengambil detail peringatan',
+            200,
+            'get_ai_warning',
+            'ai_warning'
+        );
+    }
+
+    public function update(AiWarningRequest $request, $id)
+    {
+        $data = $this->service->update($id, $request->validated());
+
+        return $this->successResponse(
+            new AiWarningResource($data),
+            'AI Warning berhasil diperbarui',
+            200,
+            'update_ai_warning',
+            'ai_warning'
+        );
+    }
+
+    public function destroy($id)
+    {
+        $this->service->delete($id);
+
+        return $this->successResponse(null, 'AI Warning berhasil dihapus', 200, 'delete_ai_warning', 'ai_warning');
+    }
 }
